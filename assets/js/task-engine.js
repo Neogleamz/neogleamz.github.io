@@ -144,7 +144,7 @@ function teRenderSidebar() {
                 </div>
             `;
         });
-        projectzList.innerHTML = window.safeHTML ? window.safeHTML(projectHTML) : projectHTML;
+        projectzList.innerHTML = window.safeHTML(projectHTML);
     }
     
     if (teamsList) {
@@ -184,7 +184,7 @@ function teRenderSidebar() {
                 </div>
             `;
         });
-        teamsList.innerHTML = window.safeHTML ? window.safeHTML(teamsHTML) : teamsHTML;
+        teamsList.innerHTML = window.safeHTML(teamsHTML);
     }
 }
 
@@ -541,7 +541,7 @@ function teRenderTaskGrid(filter = null) {
         </div>
     `;
     
-    wrapper.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    wrapper.innerHTML = window.safeHTML(html);
     
     // Initialize SortableJS
     if (typeof Sortable !== 'undefined' && (!window.teCurrentSort || !window.teCurrentSort.col)) {
@@ -830,7 +830,7 @@ window.teOpenTaskContext = function(taskId) {
                     });
                     opts += '</optgroup>';
                 }
-                assigneeSelect.innerHTML = window.safeHTML ? window.safeHTML(opts) : opts;
+                assigneeSelect.innerHTML = window.safeHTML(opts);
                 
                 let meta = JSON.parse(JSON.stringify(task.metadata || {}));
                 if (meta.assigned_team_id) {
@@ -857,7 +857,7 @@ window.teOpenTaskContext = function(taskId) {
                 relevantCycles.forEach(c => {
                     opts += `<option value="${c.id}">${c.title}</option>`;
                 });
-                cycleSelect.innerHTML = window.safeHTML ? window.safeHTML(opts) : opts;
+                cycleSelect.innerHTML = window.safeHTML(opts);
                 cycleSelect.value = task.cycle_id || '';
             }
             
@@ -920,7 +920,7 @@ window.teRenderTagEditor = function(taskId) {
             }
         });
     }
-    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    container.innerHTML = window.safeHTML(html);
 };
 
 window.teRenderSubtasks = function(taskId) {
@@ -951,7 +951,7 @@ window.teRenderSubtasks = function(taskId) {
         </div>`;
     });
     
-    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    container.innerHTML = window.safeHTML(html);
 };
 
 window.teRenderActivityFeed = function(taskId) {
@@ -969,7 +969,7 @@ window.teRenderActivityFeed = function(taskId) {
     relevantEvents.sort((a,b) => b.ts - a.ts); // descending
     
     if (relevantEvents.length === 0) {
-        container.innerHTML = window.safeHTML ? window.safeHTML('<div style="color: var(--text-muted); font-size: 12px; text-align: center;">No activity yet.</div>') : '<div style="color: var(--text-muted); font-size: 12px; text-align: center;">No activity yet.</div>';
+        container.innerHTML = window.safeHTML('<div style="color: var(--text-muted); font-size: 12px; text-align: center;">No activity yet.</div>');
         return;
     }
     
@@ -1003,7 +1003,7 @@ window.teRenderActivityFeed = function(taskId) {
             </div>`;
         }
     });
-    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    container.innerHTML = window.safeHTML(html);
 };
 
 window.teToggleTaskDone = async function(taskId) {
@@ -1040,7 +1040,7 @@ window.teOpenStatusDropdown = function(taskId, element) {
             </div>`;
         });
         
-        dropdown.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        dropdown.innerHTML = window.safeHTML(html);
         document.body.appendChild(dropdown);
         
         if (!window._teHandleDropdownClickOut) {
@@ -1422,7 +1422,7 @@ window.teSelectProject = function(projectId) {
     let p = taskEngineDB.projectz.find(x => x.id === projectId);
     if (p) {
         let titleEl = document.getElementById('te-main-header-title');
-        if (titleEl) titleEl.innerHTML = window.safeHTML ? window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`) : `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`;
+        if (titleEl) titleEl.innerHTML = window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${p.color_hex || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${p.color_hex || '#f97316'};"></span>${p.title}</span>`);
     }
     teSwitchView('list');
 };
@@ -1465,7 +1465,7 @@ window.click_teOpenEditProject = function(element) {
             </div>
         </div>
     `;
-    modalOverlay.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    modalOverlay.innerHTML = window.safeHTML(html);
     document.body.appendChild(modalOverlay);
 };
 
@@ -1509,7 +1509,7 @@ window.click_teSaveProjectEdit = async function(element) {
         if (window.teActiveProjectId === projectId) {
             let titleEl = document.getElementById('te-main-header-title');
             if (titleEl) {
-                titleEl.innerHTML = window.safeHTML ? window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`) : `<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`;
+                titleEl.innerHTML = window.safeHTML(`<span style="display:inline-flex; align-items:center; gap:8px;"><span style="display:inline-block; width:14px; height:14px; background:${newColor || '#f97316'}; border-radius:4px; box-shadow:0 0 10px ${newColor || '#f97316'};"></span>${newTitle}</span>`);
             }
         }
     });
@@ -1577,7 +1577,7 @@ window.teCreateProject = async function() {
         </div>
     `;
     
-    modalOverlay.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    modalOverlay.innerHTML = window.safeHTML(html);
     document.body.appendChild(modalOverlay);
     
     let input = document.getElementById('te-new-project-title');
@@ -1652,13 +1652,13 @@ window.teEditSectionTitle = function(cycleId, el) {
     const saveTitle = async () => {
         let newTitle = input.value.trim();
         if (newTitle && newTitle !== currentTitle) {
-            el.innerHTML = window.safeHTML ? window.safeHTML(newTitle) : newTitle;
+            el.innerHTML = window.safeHTML(newTitle);
             cycle.title = newTitle;
             try {
                 await supabaseClient.from('cyclez').update({ title: newTitle }).eq('id', cycleId);
             } catch(e) { console.error('Failed to update section title', e); }
         } else {
-            el.innerHTML = window.safeHTML ? window.safeHTML(currentTitle) : currentTitle;
+            el.innerHTML = window.safeHTML(currentTitle);
         }
     };
     
@@ -1929,7 +1929,7 @@ window.teSwitchView = function(view, btnEl) {
                 }).join('')}
             </div>
         `;
-        wrapper.innerHTML = window.safeHTML ? window.safeHTML(boardHTML) : boardHTML;
+        wrapper.innerHTML = window.safeHTML(boardHTML);
         
         // Initialize SortableJS
         if (typeof Sortable !== 'undefined') {
@@ -2105,25 +2105,19 @@ window.teSwitchView = function(view, btnEl) {
         }
         
         calendarHtml += `</div>`;
-        wrapper.innerHTML = window.safeHTML ? window.safeHTML(calendarHtml) : calendarHtml;
+        wrapper.innerHTML = window.safeHTML(calendarHtml);
     } else if (view === 'overview') {
         header.style.display = 'none';
-        wrapper.innerHTML = window.safeHTML ? window.safeHTML(`<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+        wrapper.innerHTML = window.safeHTML(`<div style="padding: 30px; text-align: center; color: var(--text-muted);">
             <h2 style="color: white; font-weight: 300;">Project Overview</h2>
             <p>Welcome to the project overview. High-level summaries and briefs will appear here.</p>
-        </div>`) : `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
-            <h2 style="color: white; font-weight: 300;">Project Overview</h2>
-            <p>Welcome to the project overview. High-level summaries and briefs will appear here.</p>
-        </div>`;
+        </div>`);
     } else if (view === 'dashboard') {
         header.style.display = 'none';
-        wrapper.innerHTML = window.safeHTML ? window.safeHTML(`<div style="padding: 30px; text-align: center; color: var(--text-muted);">
+        wrapper.innerHTML = window.safeHTML(`<div style="padding: 30px; text-align: center; color: var(--text-muted);">
             <h2 style="color: white; font-weight: 300;">Dashboard</h2>
             <p>Real-time analytics and charts for this project will render here.</p>
-        </div>`) : `<div style="padding: 30px; text-align: center; color: var(--text-muted);">
-            <h2 style="color: white; font-weight: 300;">Dashboard</h2>
-            <p>Real-time analytics and charts for this project will render here.</p>
-        </div>`;
+        </div>`);
     }
 };
 
@@ -2319,7 +2313,7 @@ window.teRenderArchiveView = function() {
     if (checkboxAll) checkboxAll.checked = false;
 
     if (archivedTasks.length === 0 && archivedCycles.length === 0 && archivedTeams.length === 0 && archivedProjects.length === 0) {
-        container.innerHTML = window.safeHTML ? window.safeHTML('<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>') : '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>';
+        container.innerHTML = window.safeHTML('<div style="padding: 20px; text-align: center; color: var(--text-muted);">No archived items.</div>');
         return;
     }
     
@@ -2345,7 +2339,7 @@ window.teRenderArchiveView = function() {
     archivedTeams.forEach(t => html += renderRow(t.id, t.name, 'team'));
     archivedTasks.forEach(t => html += renderRow(t.id, t.title, 'task'));
     
-    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    container.innerHTML = window.safeHTML(html);
 };
 
 window.teArchiveEntity = async function(type, id) {
@@ -2624,7 +2618,7 @@ window.keyup_teTagSuggest = function(event) {
     }
     
     if (suggestBox) {
-        suggestBox.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+        suggestBox.innerHTML = window.safeHTML(html);
         suggestBox.style.display = 'block';
     }
 };
@@ -2726,7 +2720,7 @@ window.tePopulateTagFilter = function() {
     sortedTags.forEach(t => {
         html += `<option value="${t.id}">${t.name}</option>`;
     });
-    filterSelect.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    filterSelect.innerHTML = window.safeHTML(html);
 };
 
 window.keyup_teFilterTaskSearch = function() {
@@ -2757,7 +2751,7 @@ window.teRenderTagManagerList = function() {
     let sortedTags = [...taskEngineDB.tagz].sort((a, b) => String(a.name||'').localeCompare(String(b.name||'')));
     
     if (sortedTags.length === 0) {
-        list.innerHTML = window.safeHTML ? window.safeHTML('<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>') : '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>';
+        list.innerHTML = window.safeHTML('<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No tags created yet.</div>');
         return;
     }
     
@@ -2771,7 +2765,7 @@ window.teRenderTagManagerList = function() {
         </div>`;
     });
     
-    list.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    list.innerHTML = window.safeHTML(html);
 };
 
 window.teCreateTagFromManager = async function() {

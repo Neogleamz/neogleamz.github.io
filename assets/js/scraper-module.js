@@ -43,7 +43,7 @@ window.openScraperFoundry = function() {
     const o = document.createElement('div');
     o.id = 'scraperFoundryOverlay';
     o.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:var(--bg-main,#0f172a);z-index:10050;display:flex;flex-direction:column;font-family:Inter,system-ui,sans-serif;';
-    o.innerHTML = window.safeHTML ? window.safeHTML(`
+    o.innerHTML = window.safeHTML(`
     <div style="height:50px;background:var(--bg-bar,#334155);border-bottom:1px solid var(--border-color,#334155);display:flex;justify-content:space-between;align-items:center;padding:0 20px;flex-shrink:0;">
         <div style="display:flex;align-items:center;gap:12px;">
             <span style="font-size:15px;font-weight:900;color:#f59e0b;">🔬 SCRAPER FOUNDRY</span>
@@ -133,97 +133,7 @@ window.openScraperFoundry = function() {
                 </div>
             </div>
         </div>
-    </div>`) : `
-    <div style="height:50px;background:var(--bg-bar,#334155);border-bottom:1px solid var(--border-color,#334155);display:flex;justify-content:space-between;align-items:center;padding:0 20px;flex-shrink:0;">
-        <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:15px;font-weight:900;color:#f59e0b;">🔬 SCRAPER FOUNDRY</span>
-            <div style="width:1px;height:24px;background:var(--border-color,#334155);"></div>
-            <span id="scraperFileName" style="font-size:12px;color:var(--text-muted,#94a3b8);font-style:italic;">No file loaded</span>
-            <span id="scraperXrayBadge" style="font-size:10px;color:#0ea5e9;font-weight:bold;display:none;">0 elements</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 14px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:6px;font-size:11px;font-weight:bold;color:#f59e0b;">
-                📂 LOAD .HTML
-                <input type="file" id="scraperFileInput" data-change="change_scraperFileInput" accept=".html,.htm" style="display:none;">
-            </label>
-            <button data-click="click_closeScraperFoundry" style="padding:6px 16px;font-size:12px;font-weight:800;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:6px;cursor:pointer;">✕ CLOSE</button>
-        </div>
-    </div>
-    <div style="display:flex;flex:1;overflow:hidden;">
-        <!-- PANE 1: VISUAL MAP -->
-        <div id="scraperPane1" style="width:60%;min-width:300px;border-right:1px solid var(--border-color,#334155);display:flex;flex-direction:column;overflow:hidden;background:#0b1121;">
-            <div style="padding:8px 16px;background:var(--bg-bar,#334155);border-bottom:1px solid var(--border-color,#334155);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-                <span style="font-size:11px;font-weight:800;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:0.5px;">🧿 X-Ray Visual Map</span>
-            </div>
-            <div id="scraperDropZone" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px;">
-                <div style="font-size:64px;opacity:0.3;">📄</div>
-                <div style="font-size:14px;color:var(--text-muted,#94a3b8);text-align:center;">Drag & drop a vendor <strong>.html</strong> file here<br>or use the <strong>LOAD</strong> button above.</div>
-            </div>
-            <iframe id="scraperIframe" sandbox="allow-same-origin" style="flex:1;width:100%;border:none;background:#fff;display:none;"></iframe>
-        </div>
-        
-        <!-- RIGHT PANES -->
-        <div style="width:40%;display:flex;flex-direction:column;overflow:hidden;">
-            <!-- PANE 2: LOGIC ENGINE -->
-            <div id="scraperPane2" style="flex:1;border-bottom:1px solid var(--border-color,#334155);display:flex;flex-direction:column;overflow:hidden;">
-                <div style="padding:8px 16px;background:var(--bg-bar,#334155);border-bottom:1px solid var(--border-color,#334155);flex-shrink:0;">
-                    <span style="font-size:11px;font-weight:800;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:0.5px;">⚙️ Schema Mapping & Extraction</span>
-                </div>
-                
-                <div style="padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:20px;">
-                    <!-- STEP 1: DEFINE BOUNDARY -->
-                    <div style="background:rgba(14,165,233,0.05);padding:14px;border-radius:8px;border:1px solid rgba(14,165,233,0.3);display:flex;flex-direction:column;gap:8px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <span style="font-size:11px;font-weight:900;color:#0ea5e9;text-transform:uppercase;">Step 1. Define Row Container</span>
-                            <span id="scraperContainerTargetCount" style="font-size:10px;color:#0ea5e9;font-weight:bold;">0 Blocks</span>
-                        </div>
-                        <p style="margin:0;font-size:10px;color:var(--text-muted,#94a3b8);line-height:1.4;">Identify the X-Ray ID of the outer wrapper (e.g. an entire Order Card or Table Row). This establishes total row bounds for your dataset.</p>
-                        <div style="display:grid; grid-template-columns: 1fr auto; gap:8px;">
-                            <input type="text" id="scraperContainerIdInput" placeholder="X-Ray ID (e.g. 14)" style="width:100%;padding:8px 12px;font-size:13px;background:var(--bg-input,#0f172a);border:1px solid rgba(14,165,233,0.4);border-radius:6px;color:var(--text-main,#e2e8f0);font-family:monospace;box-sizing:border-box;">
-                            <button data-click="click_scraperSetContainerBounds" style="padding:8px 16px;font-size:12px;font-weight:800;background:rgba(14,165,233,0.2);border:1px solid rgba(14,165,233,0.5);color:#0ea5e9;border-radius:6px;cursor:pointer;white-space:nowrap;">📦 SET BOUNDS</button>
-                        </div>
-                    </div>
-
-                    <!-- STEP 2: MAP FIELDS -->
-                    <div id="scraperStep2Wrapper" style="background:rgba(16,185,129,0.05);padding:14px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);display:flex;flex-direction:column;gap:12px;opacity:0.4;pointer-events:none;">
-                        <span style="font-size:11px;font-weight:900;color:#10b981;text-transform:uppercase;">Step 2. Map Child Column fields</span>
-                        <p style="margin:0;font-size:10px;color:var(--text-muted,#94a3b8);line-height:1.4;">Pick a target X-Ray ID inside the first wrapper block. We calculate structural relativity to pull this field identically from all mapped rows.</p>
-                        
-                        <div style="display:flex;flex-direction:column;gap:6px;">
-                            <label style="font-size:10px;font-weight:bold;color:var(--text-muted,#94a3b8);text-transform:uppercase;">Column Header</label>
-                            <input type="text" id="scraperColName" placeholder="e.g. Price, Order_ID" style="width:100%;padding:8px 12px;font-size:13px;background:var(--bg-input,#0f172a);border:1px solid rgba(16,185,129,0.4);border-radius:6px;color:var(--text-main,#e2e8f0);box-sizing:border-box;">
-                        </div>
-
-                        <div style="display:flex;flex-direction:column;gap:6px;">
-                            <label style="font-size:10px;font-weight:bold;color:var(--text-muted,#94a3b8);text-transform:uppercase;">Child X-Ray ID Target</label>
-                            <div style="display:grid; grid-template-columns: 1fr auto; gap:8px;">
-                                <input type="text" id="scraperChildTargetInput" placeholder="X-Ray ID (e.g. 18)" style="width:100%;padding:8px 12px;font-size:13px;background:var(--bg-input,#0f172a);border:1px solid rgba(16,185,129,0.4);border-radius:6px;color:var(--text-main,#e2e8f0);font-family:monospace;box-sizing:border-box;">
-                                <button data-click="click_scraperMapChildColumn" style="padding:8px 16px;font-size:12px;font-weight:800;background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.5);color:#10b981;border-radius:6px;cursor:pointer;white-space:nowrap;">⚡ MAP TO ROWS</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="scraperStatus" style="font-size:10px;color:var(--text-muted,#94a3b8);font-family:monospace;padding:6px 0;display:none;"></div>
-                </div>
-            </div>
-
-            <!-- PANE 3: EXPORT GRID -->
-            <div id="scraperPane3" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-                <div style="padding:8px 16px;background:var(--bg-bar,#334155);border-bottom:1px solid var(--border-color,#334155);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-                    <span style="font-size:11px;font-weight:800;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:0.5px;">📋 Tabular Dataset Array</span>
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <span id="scraperOutputCount" style="font-size:10px;color:#f59e0b;font-weight:bold;margin-right:8px;">0 rows</span>
-                        <button data-click="click_scraperExportXLSX" style="padding:3px 10px;font-size:10px;font-weight:bold;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#10b981;border-radius:4px;cursor:pointer;">💾 EXPORT XLSX</button>
-                        <button data-click="click_scraperCopyJSON" style="padding:3px 10px;font-size:10px;font-weight:bold;background:rgba(14,165,233,0.15);border:1px solid rgba(14,165,233,0.3);color:#0ea5e9;border-radius:4px;cursor:pointer;">📋 COPY JSON</button>
-                        <button data-click="click_scraperClearDataset" style="padding:3px 10px;font-size:10px;font-weight:bold;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:4px;cursor:pointer;">🗑️ START OVER</button>
-                    </div>
-                </div>
-                <div id="scraperOutputList" style="flex:1;overflow:auto;font-family:monospace;font-size:11px;color:#10b981;background:#0b1121;display:block;">
-                    <div style="color:#94a3b8;font-style:italic;text-align:center;padding:40px;">Dataset is empty... set your boundary in Step 1.</div>
-                </div>
-            </div>
-        </div>
-    </div>`;
+    </div>`);
     document.body.appendChild(o);
     _scraperBindDragEvents();
     if (typeof sysLog === 'function') sysLog('Scraper Foundry opened.');
@@ -299,7 +209,7 @@ function _scraperParseAndXray(rawHtml, fileName) {
         badge.className = 'top-left-action-flex';
         badge.style.gridArea = '1 / 1';
         badge.style.zIndex = '9999';
-        badge.innerHTML = `<span style="background:${color}; color:#fff; font-size:9px; font-weight:900; padding:1px 4px; border-radius:0 0 4px 0; line-height:1.2; font-family:monospace;">#${idCounter}</span>`;
+        badge.innerHTML = window.safeHTML(`<span style="background:${color}; color:#fff; font-size:9px; font-weight:900; padding:1px 4px; border-radius:0 0 4px 0; line-height:1.2; font-family:monospace;">#${idCounter}</span>`);
         el.appendChild(badge);
 
         _scraperXrayIndex.push({ id: idCounter, tag, classes: el.className || '' });
@@ -465,9 +375,9 @@ function _scraperRenderDataset() {
     const countEl = document.getElementById('scraperOutputCount');
     
     if (_scraperDataset.length === 0) {
-        container.innerHTML = window.safeHTML ? window.safeHTML(
+        container.innerHTML = window.safeHTML(
             '<div style="color:#94a3b8;font-style:italic;text-align:center;padding:40px;">Dataset is empty...</div>'
-        ) : '<div style="color:#94a3b8;font-style:italic;text-align:center;padding:40px;">Dataset is empty...</div>';
+        );
         countEl.textContent = '0 rows';
         return;
     }
@@ -503,7 +413,7 @@ function _scraperRenderDataset() {
     });
     html += '</tbody></table>';
 
-    container.innerHTML = window.safeHTML ? window.safeHTML(html) : html;
+    container.innerHTML = window.safeHTML(html);
 }
 
 window.scraperExportXLSX = function() {
