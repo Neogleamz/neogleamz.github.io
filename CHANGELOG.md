@@ -10,6 +10,7 @@
 - `debt/security` : **XSS — label-designer.js:78** — Wrapped `sel.innerHTML = html` (DB template names/IDs) in `window.safeHTML()`.
 - `debt/security` : **XSS + inline handler — packerz-module.js:3479** — Replaced `card.innerHTML` double violation (unguarded src injection + inline `onclick`) with `createElement` + `addEventListener`.
 - `fix/ui` : **Audit History blank space** — Replaced fixed `max-height:480px` on `#stockzAuditHistoryContent` with `flex-grow:1; min-height:0` so the list fills full modal height and scrolls internally.
+- `debt/security` : **Unsafe insertAdjacentHTML fallback — packerz-module.js:1581** — Hardened `openPackerzAuditLog` to early-return with console error if `window.safeHTML` is unavailable, eliminating the raw HTML injection fallback.
 - `debt/dependencies` : **fabric@5.5.2 → 7.4.0** — Resolved HIGH severity stored XSS (GHSA-hfvx-25r5-qc3w, GHSA-w22m-hvvm-xmwx). Migrated all 10 callback-style fabric API calls to Promise-based v7 API (`fromURL`, `loadFromJSON`, `setSrc`); replaced removed `setWidth`/`setHeight` with `setDimensions`; updated CDN path to `dist/index.min.js`.
 - `debt/dependencies` : **tar (via @mapbox/node-pre-gyp)** — Resolved HIGH severity path traversal (6 CVEs) via `npm audit fix`.
 - `debt/dependencies` : **uuid < 11.1.1 (via exceljs)** — Resolved MODERATE missing buffer bounds check by downgrading exceljs to 3.4.0 via `npm audit fix --force` (exceljs unused in runtime; SheetJS handles all Excel I/O).
