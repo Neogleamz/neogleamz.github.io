@@ -28,9 +28,50 @@ Internal business-ops platform for Neogleamz / SK8Lytz (skate LED hardware). Pur
 - **Discovery mode:** when charting undocumented protocols not found in the Master Reference, explicitly declare "Discovery Mode" so the user knows that the next steps are based on logical deduction rather than confirmed reference data.
 
 ## DOM security (XSS)
-- Never assign dynamic data via `.innerHTML` / `.insertAdjacentHTML` / `document.write` without wrapping the payload in `window.safeHTML()` (DOMPurify).
-- No inline event handlers (`onclick=`, etc.) — use `data-click` tokens bound to [assets/js/system-event-delegator.js](assets/js/system-event-delegator.js).
-- **Active scan mandate:** during any code review, `/legacy-audit`, or health-check pass, actively scan for unguarded `innerHTML`, `insertAdjacentHTML`, and `document.write` calls. Any unguarded assignment is a Critical security finding, flag it immediately.
+
+### Canonical scanner
+Run `node scripts/xss-audit.js` for any security scan. **Never use grep with negative-lookahead patterns** — they silently fail on long lines and produce false negatives. The script reads every line of every file and catches 100% of violations.
+
+### ✅ Allowed patterns (only these)
+```js
+element.innerHTML = window.safeHTML(html);                          // direct call — correct
+element.insertAdjacentHTML('pos', window.safeHTML(html));           // direct call — correct
+document.body.insertAdjacentHTML('beforeend', window.safeHTML(h));  // direct call — correct
+// For print windows: sanitize the assembled string first
+const safe = DOMPurify.sanitize(html);
+printWin.document.write(safe);
+// For static/empty strings — no wrapper needed
+element.innerHTML = '';
+element.innerHTML = '<span>static literal only</span>';
+```
+
+### 🚫 Forbidden patterns (never write these)
+```js
+// ❌ BANNED — ternary fallback exposes raw HTML if engine.js fails to load
+element.innerHTML = window.safeHTML ? window.safeHTML(x) : x;
+
+// ❌ BANNED — dynamic data with no guard
+element.innerHTML = `...${dbValue}...`;
+element.insertAdjacentHTML('beforeend', `...${msg}...`);
+element.outerHTML = `...${e.message}...`;
+
+// ❌ BANNED — document.write with DB-sourced strings unescaped
+win.document.write(`...${s.text}...`);   // s.text is a DB column
+
+// ❌ BANNED — inline event handlers in HTML strings or static markup
+element.innerHTML = `<button onclick="fn()">`;  // use data-click token
+// In static HTML: <select onchange="fn()">      // use data-change token
+```
+
+### Why the ternary is specifically banned
+`window.safeHTML` is always defined by `neogleamz-engine.js` (it has its own `innerText` escape fallback inside). The ternary's false branch (`x`) is never needed and creates an XSS gate if the engine module fails to load. Unconditional `window.safeHTML(x)` is both safer and simpler.
+
+### Active scan mandate
+During any code review, `/legacy-audit`, or `/health_check`:
+1. Run `node scripts/xss-audit.js` first — its output is ground truth
+2. Manually read every raw hit (do not filter with regex); confirm each is SAFE / GUARDED / UNGUARDED
+3. Any UNGUARDED assignment with dynamic data is a **Critical** finding — block the PR
+4. Track all findings in [tools/SK8Lytz_Bucket_List.md](tools/SK8Lytz_Bucket_List.md) §🧹 Technical Debt
 
 ## Coding preferences
 - **4-state UX:** every data component handles `Loading` / `Error` (with fallback) / `Empty` / `Success`.
@@ -62,6 +103,52 @@ The database is the source of truth. When frontend logic needs fuzzy matching / 
 
 ## Verification mandate
 No unverified "it's fixed." Prove it — run Node/scripts to check data structures, parse DOM/SVG coords for layout, show the receipts. Write throwaway verification scripts to `scratch/` (gitignored).
+
+## Subagent mandates
+
+### Pre-task research swarm (required for every bucket list task)
+Before writing any implementation code, spawn these agents **in parallel**:
+1. **Explore agent** — map every file and line that the task will touch. Include callers, imports, DOM IDs, Supabase table names. Returns the full touch-point map.
+2. **Plan agent** — using the explore agent's map plus the task description, CLAUDE.md rules, and the Master Reference, generate a detailed implementation plan covering: security considerations (XSS, RLS), Vanilla JS constraints, 4-state UX, UI mutex where needed, and any schema changes. Save to `docs/plans/<branch>.md`.
+3. **Security scout** (required for any XSS/security fix) — run `node scripts/xss-audit.js --warn` focused on the target file(s); enumerate every violation that the task must resolve so nothing is missed mid-implementation.
+
+HALT and present the plan to the user before writing any code.
+
+### Post-task validation swarm (required after every implementation)
+After editing files but **before committing**, spawn these agents **in parallel**:
+1. **XSS validator** — run `node scripts/xss-audit.js --warn` and confirm: (a) the violations the task was supposed to fix are gone, (b) no new violations were introduced.
+2. **Test + lint runner** — run `npm test` and `npx eslint .`; capture counts and any failures.
+3. **Manual test guide generator** — produce a fully detailed testing guide (see format below) for every changed surface, covering happy path, error states, regression checks, and Supabase/DB verification steps.
+
+Do not commit until all three agents have returned and their results are clean or explicitly accepted by the user.
+
+### Manual testing guide format (always required at task end)
+Every completed bucket list task must end with a guide in this exact structure:
+
+```
+### 🧪 Manual Testing Guide — <task name>
+
+**Browser:** Chrome 120+ (required — Web Bluetooth + DOMPurify CSP)
+**Environment:** http://127.0.0.1:5500 (local) or https://neogleamz.github.io (live)
+**Prerequisites:** [login state / Supabase seed data / BLE device needed / none]
+
+#### ✅ Happy Path
+1. Navigate to **[HUB TAB]** → **[Sub-pane or section name]**
+2. [Exact action: click button / fill input / scan barcode]
+3. Expected result: [what the UI should show — loading state → success state]
+
+#### ❌ Error & Edge Cases
+1. [How to trigger the error] → Expected: [exact error message or UI state]
+2. [Edge case e.g. empty field, duplicate entry] → Expected: [UI response]
+
+#### 🔁 Regression Checks (nearby features — verify nothing broke)
+- [Feature 1 to spot-check and how]
+- [Feature 2 to spot-check and how]
+
+#### 🗄️ Database Verification (if DB write occurred)
+- Supabase dashboard → Table: **[table_name]**
+- Verify: [specific row/column/value that should have changed]
+```
 
 ## Workflows
 Workflow commands live in [.claude/commands/](.claude/commands) (e.g. `/ship-it`, `/bucketlist`, `/release`); flagship ones also auto-trigger as skills in `.claude/skills/`. The Gemini originals stay in [.agents/workflows/](.agents/workflows).

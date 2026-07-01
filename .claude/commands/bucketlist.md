@@ -19,40 +19,56 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - Now safely standing on the epic base branch, execute `git checkout -b <extracted-branch-slug>`.
    - **CRITICAL SAFETY RULE**: YOU ARE STRICTLY FORBIDDEN from ever using the `-B` flag inside `git checkout`. Forcing a branch recreation via `-B` wipes out unmerged user commits and destroys local history. Never guess; check if the branch exists before creating.
 
-3. **Discovery & Clarification Phase**:
-   - Analyze the bucket list requirement.
-   - Determine if you have 100% of the information required to build a perfect Vanilla JS / Supabase implementation plan.
-   - If requirements are ambiguous, **HALT ALL ACTION.** Output a numbered list of clarifying questions for the user (e.g., *"1. What specific flexbox layout do you want for this UI?", "2. Should this Supabase query be cached in localStorage?"*). Wait for answers before proceeding.
+3. **Pre-Task Intelligence Swarm (MANDATORY — spawn all agents in parallel before writing any code)**:
 
-4. **Plan Retrieval & Mandatory Review Gate (HALT)**:
-   - First, check if a pre-compiled plan exists in the Bucket List entry (e.g., `docs/plans/<extracted-branch-slug>.md`). If it exists, read it.
-   - If a plan does NOT exist, you MUST generate a highly detailed, fully documented Implementation Plan from scratch. This plan must cover security considerations, flexbox UI structure, performance impacts, and strict Vanilla JS standards. Save this new plan to `docs/plans/<extracted-branch-slug>.md` for permanent storage.
-   - Use your **Native Antigravity Artifact Generator** to present the plan (either retrieved or newly generated) in the UI.
-   - **Crucial:** Ensure the plan starts with `### Design Decisions & Rationale`, explaining *why* specific Vanilla JS or Web Bluetooth approaches were chosen.
-   - Set the `RequestFeedback` parameter in the Artifact generator to `true`.
-   - **HALT ALL ACTION.** Explicitly ask: *"I have loaded the dual-synced plan artifact. Review the plan in the UI panel. Type 'proceed' to execute, or provide feedback."* Do not write code until approved.
+   Dispatch the following agents simultaneously using the Agent tool in a single message:
 
-5. **Execute Work**: 
-   - Once the user types "proceed", use your code-editing tools to implement the module exactly as outlined in the approved plan.
+   - **Agent A — Touch-Point Mapper (Explore):** Read every file that this task will modify or that calls the affected function/component. Map DOM IDs, Supabase table names, module imports, and event-delegator tokens involved. Return a complete touch-point inventory.
+   - **Agent B — Implementation Planner (Plan):** Using the touch-point map, the task description, all rules in CLAUDE.md, and the Master Reference, generate a detailed plan covering: security (XSS guards, RLS), Vanilla JS constraints (no frameworks, no `var`), 4-state UX pattern, UI mutex for mutations, zero-refresh re-render, and any schema changes. Save to `docs/plans/<extracted-branch-slug>.md`.
+   - **Agent C — Security Scout (always required for XSS/security tasks):** Run `node scripts/xss-audit.js --warn` and enumerate every violation in the target file(s) that this task must resolve. If the task is not security-related, skip this agent.
 
-6. **Self-Review, QA & Refactor Phase**:
-   - Before committing, act as a Senior Security & Performance Engineer.
-   - Review your newly written code. Look for: hardcoded Supabase keys, memory leaks (e.g., un-removed DOM event listeners), missing `try/catch` blocks, or poor naming conventions.
-   - **Continuous QA Gate (CRITICAL):** You MUST execute `npm test` and `npx eslint .` in the terminal to verify zero regressions and zero syntax flaws. You are strictly forbidden from committing code if either command throws an error.
-   - Output a brief "Code Review Report". If flaws or test failures are found, refactor them immediately. If pristine and tests pass, state "Code Review Passed."
+   Once all agents return, synthesize their outputs, present the plan to the user, and:
+   - **HALT ALL ACTION.** Ask: *"Pre-task intelligence complete. Review the plan above. Type 'proceed' to execute, or provide feedback."* Do not write code until approved.
 
-7. **Commit & Sync Phase**:
+4. **Discovery & Clarification Phase**:
+   - If Agent A or B surfaces ambiguities or missing information, **HALT.** Output a numbered list of clarifying questions. Wait for answers before proceeding.
+   - If requirements are clear: proceed to Execute.
+
+5. **Execute Work**:
+   - Once the user types "proceed", implement exactly as outlined in the approved plan.
+   - For XSS fixes: use only the allowed patterns from CLAUDE.md §DOM security. After each file edit, confirm that the specific violation line is gone before moving to the next file.
+
+6. **Post-Implementation Validation Swarm (MANDATORY — spawn all agents in parallel before committing)**:
+
+   Dispatch the following agents simultaneously:
+
+   - **Agent V1 — XSS Validator:** Run `node scripts/xss-audit.js --warn` on the full codebase. Confirm: (a) every violation this task was responsible for is no longer present, (b) no new violations were introduced by the implementation. Return a before/after violation count.
+   - **Agent V2 — Test + Lint Runner:** Run `npm test` and `npx eslint .`. Return: test pass/fail counts, ESLint error/warning counts, and any specific failures with file:line details.
+   - **Agent V3 — Manual Test Guide Generator:** Given the list of changed files and the task description, generate a fully detailed manual testing guide using the exact format specified in CLAUDE.md §Subagent mandates. Cover: happy path, error/edge cases, regression checks on nearby features, and Supabase DB verification steps.
+
+   **HALT if V1 or V2 returns failures.** Present the failures and ask the user whether to fix or abort. Do not commit until both pass (or user explicitly accepts).
+
+7. **Self-Review Report**:
+   - Synthesize outputs from V1/V2/V3 into a single "Validation Report":
+     - XSS violations removed: N / introduced: 0
+     - Tests: N/N pass
+     - ESLint: 0 errors, N warnings
+     - Code Review: list any security/performance issues noticed during implementation
+   - If all clean: state "Validation Passed — ready to commit."
+
+8. **Commit & Sync Phase**:
    - Check if your changes affected Supabase schemas, Web Bluetooth logic, or core system architecture.
    - If so, autonomously trigger the *Corporate Memory Synchronization Rule* to update `@tools/SK8Lytz_App_Master_Reference.md`.
    - Stage your specific file changes (avoid blind `git add .` if there are untracked files).
    - Execute: `git commit -m "feat(<scope>): complete <extracted-branch-slug>"`
 
-8. **Update Tracking, Archive & Halt**: 
+9. **Update Tracking, Archive & Halt**:
    - **LEDGER HYDRATION GATE:** Before modifying the ledger, you MUST execute `git checkout main && git pull origin main && git checkout -` to ensure your local `SK8Lytz_Bucket_List.md` is not stale.
    - Change the checkbox for this item to `- [x]`.
-   - **Enforce Archiving Protocol**: Scan the surrounding epic `### Target:` block. If every single item in this specific Epic is now marked as `[x]` (or if it was a single-task Epic to begin with), you MUST autonomously cut the entire block (the `### Target:` header, the `*(Epic...)*` subheader, and all the `[x]` tasks) and paste it at the absolute bottom of the file under the `🗄️ Completed & Archived Epics` section to keep the active list clean. Do not wait for the wind-down sequence to do this. **NEVER DELETE THE RAW TASKS**. The Bucket List is an immutable ledger.
-   - If the Epic block was just fully completed and archived, you must output a massive warning message tailored to the context:
-     - **If it was a Single-Task Epic directly on `main`**: Tell the user to run `[/ship_it]` to merge the feature branch, followed by `[/release]` to formally deploy it.
-     - **If it was a Multi-Part Epic on an `epic/*` branch**: Tell the user to run `[/ship_it]` to merge this final feature into the epic branch, and then run `[/finalize_epic]` to safely deploy the entire Epic branch into production.
-   - **Mandatory UI Testing Instructions**: You MUST output a clearly formatted list instructing the user exactly *where* and *how* to manually test the changes in the live browser. You must explicitly name the correct Hub tab (e.g., STOCKZ, EDITZ, SOCIALZ) and the specific page elements or buttons they need to click to verify your work.
-   - Output a clean confirmation message to the chat that the task is complete and the branch is ready for testing. Do not automatically start the next task.
+   - **Enforce Archiving Protocol**: Scan the surrounding epic `### Target:` block. If every single item in this specific Epic is now marked as `[x]` (or if it was a single-task Epic to begin with), you MUST autonomously cut the entire block (the `### Target:` header, the `*(Epic...)*` subheader, and all the `[x]` tasks) and paste it at the absolute bottom of the file under the `🗄️ Completed & Archived Epics` section to keep the active list clean. **NEVER DELETE THE RAW TASKS**. The Bucket List is an immutable ledger.
+   - If the Epic block was just fully completed and archived, output the appropriate warning:
+     - **Single-Task Epic on `main`**: Run `[/ship_it]` → `[/release]`.
+     - **Multi-Part Epic on `epic/*`**: Run `[/ship_it]` → `[/finalize_epic]`.
+   - **Output the Manual Testing Guide from Agent V3** in full — do not abbreviate it. It must follow the format in CLAUDE.md §Subagent mandates exactly: Browser, Environment, Prerequisites, Happy Path (numbered steps), Error & Edge Cases, Regression Checks, DB Verification.
+   - Output the Validation Report summary (XSS / tests / lint counts).
+   - Output a confirmation that the branch is ready for `/ship-it`. Do not automatically start the next task.

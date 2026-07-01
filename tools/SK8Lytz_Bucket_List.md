@@ -27,7 +27,39 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 ## 🧹 Technical Debt
 
-*Clean sweep — all technical debt items successfully completed and archived!* ✅
+*Verified by 4 independent agents — 2026-07-01*
+
+#### 🔴 Critical — Unguarded DOM Injection (no safeHTML at all)
+- [ ] `debt/security` : **[index.html:4408](../index.html)** — `sysLog()` debug logger calls `insertAdjacentHTML('beforeend', ...)` with raw `${msg}` and `${htmlPayload}`. `msg` is passed by `window.onerror`, unhandled promise rejections (`event.reason`), and all `catch(e)` blocks across the app — any of these can carry DB-sourced or externally-influenced strings. `htmlPayload` is `JSON.stringify(payload)` which does not HTML-escape. No `window.safeHTML()` anywhere in the call path. Wrap both variables before insertion.
+- [ ] `debt/security` : **[barcodz-module.js:485](../assets/js/barcodz-module.js)** — print confirmation modal: `modalEl.innerHTML = innerHtml` where `innerHtml` interpolates `${activeSizeSelect}` (DB-populated dropdown value, unsanitized). Attribute-escape attack vector. Wrap in `window.safeHTML(...)`.
+- [ ] `debt/security` : **[label-designer.js:708](../assets/js/label-designer.js)** — print confirmation modal: `modalEl.innerHTML = innerHtml` where `innerHtml` interpolates `${window.ldState.paperProfile}` (user-saved label profile name, unsanitized). Same attribute-escape vector. Wrap in `window.safeHTML(...)`.
+
+#### 🔴 Critical — Systemic: Ternary safeHTML Fallback (33 DOM-write instances)
+- [ ] `debt/security` : **[index.html — 33 instances](../index.html)** — Pattern `window.safeHTML ? window.safeHTML(x) : x` throughout the inline script. If `neogleamz-engine.js` fails to load (network error, script error), `window.safeHTML` is `undefined` and every fallback branch injects raw HTML. High-risk fallback sites include: L5461 (recipe names from DB), L5861 (DB column keys in button HTML), L5918/6016 (full DB table rows), L6303–6319 (product name dropdowns from DB), L4855/7002/7068 (Supabase error messages). Replace all 33 with unconditional `window.safeHTML(x)` calls — the function itself already has an `innerText` escape fallback if DOMPurify is absent.
+
+#### 🟠 Moderate — Unguarded Print Window document.write (DB data flows unescaped)
+- [ ] `debt/security` : **[production-module.js:2545–2626](../assets/js/production-module.js)** — SOP print window pipes `globalRichTextHTML` (raw rich-text HTML from DB) and `s.text` (SOP step text from DB) into `win.document.write(html)` with no sanitization. An admin-inserted `<script>` in an SOP step executes in the same-origin print popup.
+- [ ] `debt/security` : **[packerz-module.js:925–1008](../assets/js/packerz-module.js)** — SOP print window pipes `pName` (recipe name from DB), `s.text`, and `s.qaChecks` (SOP step/QA text from DB) into `win.document.write(html)` unguarded.
+- [ ] `debt/security` : **[print-module.js:880–956](../assets/js/print-module.js)** — SOP print window pipes `s.text` and header content from DB SOP steps into `win.document.write(html)` unguarded.
+- [ ] `debt/security` : **[inventory-module.js:1091–1097](../assets/js/inventory-module.js)** — Reorder report print window pipes `x.nn` (neogleamz name), `x.n` (item name), `x.sp` (spec) from DB into `win.document.write(html)` unguarded.
+- [ ] `debt/security` : **[production-module.js:2419–2425](../assets/js/production-module.js)** — Work order print window pipes `name` and product names from DB into `win.document.write(html)` unguarded. Fix pattern for all five: run `DOMPurify.sanitize(html)` on the assembled string before passing to `document.write`, or switch to `Blob` + `URL.createObjectURL`.
+
+#### 🟠 Moderate — DOMPurify as Last Line of Defense (free-text DB fields reach safeHTML)
+- [ ] `debt/security` : **[inventory-module.js:3116–3162](../assets/js/inventory-module.js)** — `refreshStockzAuditHistory()` concatenates raw DB fields `row.reason_code`, `row.operator_email`, and `row.notes` (free-text form input) directly into the HTML string `h` before calling `window.safeHTML(h)`. DOMPurify is the only protection. Add a text-escape helper for free-text fields before concatenation so DOMPurify isn't a single point of failure for stored-XSS.
+- [ ] `debt/security` : **[socialz-module.js:788, 814](../assets/js/socialz-module.js)** — `log()` function embeds `s.name` (skater name from Supabase) into `msg` and then into `term.innerHTML` via the ternary fallback. If DOMPurify is absent, a malicious skater name in the DB executes as HTML in the socialz terminal.
+
+#### 🟠 Hygiene — Inline Event Handlers (CLAUDE.md violation)
+- [ ] `debt/hygiene` : **[index.html:2653](../index.html)**, **[index.html:2712](../index.html)**, **[index.html:2822](../index.html)** — three `<select>` elements (`#barcodzTemplateSelect`, `#labelzTemplateSelect`, `#labelzDesignerTemplateSelect`) use `onchange=""` inline attribute handlers. Convert all three to `data-change` tokens registered in `system-event-delegator.js`.
+- [ ] `debt/hygiene` : **[bom-module.js:38](../assets/js/bom-module.js)** — inline `onclick="document.getElementById('bulkAddModal').style.display='none';"` baked into a dynamically built `<tr>`. Replace with a `data-click` delegator token.
+- [ ] `debt/hygiene` : **[packerz-module.js:163](../assets/js/packerz-module.js)** and **[packerz-module.js:2489](../assets/js/packerz-module.js)** — redundant `onclick="event.stopPropagation()"` alongside `data-app-click="stopProp"` (which already works). Remove the inline `onclick=` attributes.
+
+#### 🟠 Infrastructure — No SRI on CDN Scripts + CSP Gaps
+- [ ] `debt/security` : **[index.html:11–17](../index.html)** — None of the 7 CDN `<script>` tags (including DOMPurify itself) carry an `integrity="sha384-..."` SRI hash. A compromised CDN could serve a malicious DOMPurify that bypasses all safeHTML calls. Add SRI hashes to all CDN scripts.
+- [ ] `debt/security` : **[index.html:6](../index.html)** — CSP `script-src` includes both `'unsafe-inline'` and `'unsafe-eval'`, which nullifies XSS injection protection entirely (required by the inline-script architecture). Long-term: extract the inline `<script>` block to an external file to allow `'unsafe-inline'` removal. Short-term: add a `report-uri` directive so violations are visible.
+- [ ] `debt/hygiene` : **[index.html:6](../index.html)** — Dev/sandbox `connect-src` URLs (`http://127.0.0.1:54321`, `ws://127.0.0.1:54321`) are present in the production CSP. Remove from production.
+
+#### 🟡 Low — outerHTML with e.message (browser-controlled, low risk)
+- [ ] `debt/security` : **[packerz-module.js:1734, 1742](../assets/js/packerz-module.js)** and **[production-module.js:2763, 2769](../assets/js/production-module.js)** — `el.outerHTML = \`...\${e.message}\`` in barcode/QR error handlers. `e.message` is JS Error.message (browser-controlled, unlikely to carry injection), but should be escaped for correctness. Replace with `textContent` on a created element.
 
 ---
 
