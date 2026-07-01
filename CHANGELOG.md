@@ -1,24 +1,46 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
-- `debt/dependencies` : **exceljs removed** — package was unused at runtime (all Excel I/O uses SheetJS). Removal eliminated the `uuid` moderate vulnerability; `npm audit` now reports 0 vulnerabilities and 95 fewer packages.
-- `chore/hygiene` : **coverage/ added to .gitignore** — Untracked and removed 31 test artifact files (clover.xml, lcov.info, HTML coverage reports) from the repo; `npm test` output now stays local-only and never deploys to GitHub Pages.
-- `fix/shopify-exchange-reconciliation` : **Shopify Exchange & Return Reconciliation** - Resolve the double-counting of quantities and revenue on Shopify exchanges and returns. Ensure returned line items subtract their refunded quantities at the database webhook level and CSV import level.
-- `debt/security` : **Unguarded innerHTML** - `modalEl.innerHTML = innerHtml;` is currently used in `assets/js/barcodz-module.js` (Line 476) without `window.safeHTML()` wrapper. This poses an XSS risk.
-- `debt/security` : **Unguarded insertAdjacentHTML** - `b.insertAdjacentHTML(...)` is currently used in `index.html` (Line 4268) without `window.safeHTML()` wrapper.
-- `debt/dependencies` : Update `@supabase/supabase-js` from `2.106.2` to `2.107.0` (Patch).
-- `debt/security` : **XSS — inventory-module.js:3162** — Wrapped `historyContainer.innerHTML = h` (DB row data incl. user-supplied `row.notes`) in `window.safeHTML()`.
-- `debt/security` : **XSS — inventory-module.js:3172** — Wrapped `historyContainer.innerHTML = \`...\${e.message}\`` error injection in `window.safeHTML()`.
-- `debt/security` : **XSS — label-designer.js:78** — Wrapped `sel.innerHTML = html` (DB template names/IDs) in `window.safeHTML()`.
-- `debt/security` : **XSS + inline handler — packerz-module.js:3479** — Replaced `card.innerHTML` double violation (unguarded src injection + inline `onclick`) with `createElement` + `addEventListener`.
-- `fix/ui` : **Audit History blank space** — Replaced fixed `max-height:480px` on `#stockzAuditHistoryContent` with `flex-grow:1; min-height:0` so the list fills full modal height and scrolls internally.
-- `debt/security` : **Unsafe insertAdjacentHTML fallback — packerz-module.js:1581** — Hardened `openPackerzAuditLog` to early-return with console error if `window.safeHTML` is unavailable, eliminating the raw HTML injection fallback.
-- `debt/dependencies` : **fabric@5.5.2 → 7.4.0** — Resolved HIGH severity stored XSS (GHSA-hfvx-25r5-qc3w, GHSA-w22m-hvvm-xmwx). Migrated all 10 callback-style fabric API calls to Promise-based v7 API (`fromURL`, `loadFromJSON`, `setSrc`); replaced removed `setWidth`/`setHeight` with `setDimensions`; updated CDN path to `dist/index.min.js`.
-- `debt/dependencies` : **tar (via @mapbox/node-pre-gyp)** — Resolved HIGH severity path traversal (6 CVEs) via `npm audit fix`.
-- `debt/dependencies` : **uuid < 11.1.1 (via exceljs)** — Resolved MODERATE missing buffer bounds check by downgrading exceljs to 3.4.0 via `npm audit fix --force` (exceljs unused in runtime; SheetJS handles all Excel I/O).
-- `debt/dependencies` : **eslint** 10.4.1 → 10.6.0 (patch).
-- `debt/dependencies` : **prettier** 3.8.3 → 3.9.4 (patch).
-- `debt/dependencies` : **supabase CLI** 2.104.0 → 2.109.0 (minor).
+## [1.5.1] - 2026-07-01
+
+### 🔒 Security Hardening
+- **XSS — FORBIDDEN_TERNARY sweep — task-engine.js (26 instances)** — Eliminated all 26 `window.safeHTML ? window.safeHTML(x) : x` ternary fallbacks across task name rendering, section labels, and status pill HTML (all DB-sourced). Replaced with unconditional `window.safeHTML(x)` via paren-depth-counting script.
+- **XSS — FORBIDDEN_TERNARY sweep — scraper-module.js (4 violations)** — Removed 3 ternary fallbacks (incl. a ~180-line false-branch duplicate at line 46) and wrapped 1 UNGUARDED `badge.innerHTML` (product data) in `window.safeHTML()`.
+- **XSS — FORBIDDEN_TERNARY sweep — ceo-module.js (4 instances)** — CEO dashboard product/revenue label rendering hardened.
+- **XSS — FORBIDDEN_TERNARY sweep — labelz-module.js (2 instances)** — Template name and label data from DB now routed through unconditional `window.safeHTML()`.
+- **XSS — FORBIDDEN_TERNARY sweep — analytics-module.js (1 instance)** — Analytics table wrap hardened; `applyTableInteractivity()` call preserved.
+- **XSS — FORBIDDEN_TERNARY sweep — kpi-reports-module.js (1 instance)** — KPI report modal content hardened.
+- **XSS — FORBIDDEN_TERNARY sweep — index.html (38 instances)** — All 38 fallback ternaries in the inline script (covering recipe names, DB column keys, full table rows, product name dropdowns, Supabase error messages) replaced with unconditional `window.safeHTML(x)`.
+- **XSS — sysLog() unguarded insertAdjacentHTML — index.html:4408** — Debug logger `insertAdjacentHTML('beforeend', ...)` raw `${msg}` and `${htmlPayload}` (window.onerror, unhandled rejections, JSON.stringify) wrapped in `window.safeHTML()`.
+- **XSS — print window document.write — 5 modules** — `production-module.js` (SOP + work order print), `packerz-module.js` (SOP print), `print-module.js` (SOP print), `inventory-module.js` (reorder report) all migrated to `DOMPurify.sanitize(html)` before `document.write`.
+- **XSS — unguarded innerHTML — barcodz-module.js:485** — Print confirmation modal `modalEl.innerHTML` interpolating DB dropdown value wrapped in `window.safeHTML()`.
+- **XSS — unguarded innerHTML — label-designer.js:708** — Print confirmation modal `modalEl.innerHTML` interpolating user-saved label profile name wrapped in `window.safeHTML()`.
+- **XSS — unguarded innerHTML — inventory-module.js:3162/3172** — Audit history `historyContainer.innerHTML` (DB row data incl. user-supplied `row.notes` and `e.message`) wrapped in `window.safeHTML()`.
+- **XSS — unguarded innerHTML — label-designer.js:78** — Template selector `sel.innerHTML` (DB template names/IDs) wrapped in `window.safeHTML()`.
+- **XSS — unguarded innerHTML + inline handler — packerz-module.js:3479** — `card.innerHTML` double violation (unguarded src injection + inline `onclick`) replaced with `createElement` + `addEventListener`.
+- **XSS — DOMPurify last line of defense — inventory-module.js:3116–3162 + socialz-module.js:788,814** — Free-text DB fields (`row.notes`, `row.reason_code`, `row.operator_email`, skater names) now text-escaped before safeHTML wrapping; socialz terminal ternary removed.
+- **XSS — unsafe insertAdjacentHTML fallback — packerz-module.js:1581** — `openPackerzAuditLog` hardened to early-return with console error if `window.safeHTML` unavailable.
+- **SRI hashes on all 13 CDN scripts** — `integrity="sha384-..."` + `crossorigin="anonymous"` added to every CDN `<script>` tag in `index.html`. Floating versions pinned: supabase-js→@2.110.0, chart.js→@4.5.1/dist/chart.umd.min.js, html5-qrcode→@2.3.8, sortablejs→@1.15.7, jspdf→@4.2.1. CDN `?v=` cache-busters stripped (incompatible with SRI). `scripts/generate-sri-hashes.js` utility created.
+- **CSP dev URLs removed — index.html** — `connect-src` dev/sandbox URLs (`http://127.0.0.1:54321`, `ws://127.0.0.1:54321`) stripped from production CSP meta tag. `report-uri` limitation documented in-code (W3C CSP §7.1: ignored in `<meta>` tags; requires HTTP headers).
+- **qrcode CDN fix — lib/browser.js → @1.4.4 UMD** — Replaced `qrcode@1.5.3/lib/browser.js` (CommonJS, throws `require is not defined` in browser) with `qrcode@1.4.4/build/qrcode.min.js` (proper UMD bundle).
+
+### 🧹 Chores & Cleanup
+- **Inline event handler removal — index.html (3 `<select>` elements)** — `#barcodzTemplateSelect`, `#labelzTemplateSelect`, `#labelzDesignerTemplateSelect` migrated from `onchange=""` to `data-change` delegator tokens in `system-event-delegator.js`.
+- **Inline event handler removal — bom-module.js:38** — Dynamic `<tr>` inline `onclick` replaced with `data-click` delegator token.
+- **Inline event handler removal — packerz-module.js:163,2489** — Redundant `onclick="event.stopPropagation()"` alongside existing `data-app-click="stopProp"` removed.
+- **outerHTML e.message hardening — packerz-module.js:1734,1742 + production-module.js:2763,2769** — `el.outerHTML = \`...\${e.message}\`` in barcode/QR error handlers replaced with `textContent` on created elements.
+- **bump-system-version.js CDN skip guard** — Version bump script patched to skip CDN lines (`cdn.jsdelivr.net`, `cdnjs.cloudflare.com`, `unpkg.com`, `cdn.sheetjs.com`) so future version bumps never invalidate SRI hashes.
+- **coverage/ added to .gitignore** — 31 test artifact files (clover.xml, lcov.info, HTML coverage reports) removed from repo; `npm test` output stays local-only.
+- **Audit History blank space fix** — Replaced fixed `max-height:480px` on `#stockzAuditHistoryContent` with `flex-grow:1; min-height:0`.
+
+### 📦 Dependencies
+- **exceljs removed** — Package was unused at runtime (all Excel I/O uses SheetJS). Removal eliminated the `uuid` moderate vulnerability; `npm audit` now reports 0 vulnerabilities and 95 fewer packages.
+- **fabric@5.5.2 → 7.4.0** — Resolved HIGH severity stored XSS (GHSA-hfvx-25r5-qc3w, GHSA-w22m-hvvm-xmwx). Migrated all 10 callback-style API calls to Promise-based v7 API; updated CDN path to `dist/index.min.js`.
+- **tar (via @mapbox/node-pre-gyp)** — Resolved HIGH severity path traversal (6 CVEs) via `npm audit fix`.
+- **uuid < 11.1.1 (via exceljs)** — Resolved MODERATE missing buffer bounds check (exceljs removed entirely).
+- **@supabase/supabase-js** 2.106.2 → 2.110.0 (pinned in CDN SRI).
+- **eslint** 10.4.1 → 10.6.0 (patch).
+- **prettier** 3.8.3 → 3.9.4 (patch).
+- **supabase CLI** 2.104.0 → 2.109.0 (minor).
 
 ## [1.5.0] - 2026-06-30
 
