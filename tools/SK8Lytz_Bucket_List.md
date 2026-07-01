@@ -25,6 +25,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 
 *Clean sweep — all high priority active epics successfully completed and archived!* ✅
 
+### 🟡 P2 Medium Priority (Enhancements & Automation)
+
+#### Target: `main`
+- [ ] `chore/agent-model-tiering` : **Agent Model & Effort Tiering** - Assign every command, skill, and recurring subagent role a deliberate model tier (Balanced strategy: Haiku for mechanical, Sonnet for structured workflows, Opus for deep/adversarial reasoning). Implement via `model:` frontmatter pins on all entry points (canonical + alias + skill) plus 7 named `.claude/agents/*.md` definitions so `/bucketlist` swarm dispatches stop inheriting the parent tier. (Plan: [docs/plans/chore/agent-model-tiering.md](../docs/plans/chore/agent-model-tiering.md)) [Files: .claude/commands/*.md, .claude/skills/*/SKILL.md, .claude/agents/*.md, CLAUDE.md]
+
 ## 🧹 Technical Debt
 
 *Clean sweep — all technical debt successfully completed and archived!* ✅
