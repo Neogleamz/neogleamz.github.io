@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Gracefully updates the Bucket List ledger and internal CHANGELOG.md directly after a /ship_it without triggering formal version bumps or tags. (triggers: /release_silent, silent release, silent sync)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

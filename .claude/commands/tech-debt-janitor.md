@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Scans the codebase for vulnerabilities and technical debt, then triages findings into the bucket list. (triggers: /health_check, /health-check, run health check, clean the house)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: active_context_lock
 description: A continuous passive guardrail preventing catastrophic scope creep and cross-branch history contamination. Triggers on mid-task "can you also…" requests, [override] keyword, or any scope-creep phrasing while on a feat/* branch.
 ---

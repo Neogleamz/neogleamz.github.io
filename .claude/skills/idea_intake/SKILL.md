@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: idea_intake
 description: Passively log a new idea to the bucket list backlog without interrupting the active workflow. Use when the user says "add this idea", "add to bucket list", "log this idea", or "log this task".
 ---

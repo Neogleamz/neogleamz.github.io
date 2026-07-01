@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Triggers a persona shift to a novice, untrained worker to evaluate Desktop web UI for internal business tools. (triggers: /simulate_ux, /ux-pass, simulate user, run a UX pass)
 ---
 

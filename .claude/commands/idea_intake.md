@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Triggers when the user requests to log a new idea, feature, or bug to the backlog without interrupting their current workflow. (triggers: /idea_intake, add this idea, add to bucket list, log this task)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

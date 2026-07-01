@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Triggers whenever the AI attempts to add an external library, forcing a justification check and prioritizing native Browser APIs. (triggers: /dependency_diet, /dependencies, verify dependencies, check dependencies)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Triggers whenever the user brainstorms a new feature or uses an intake command to validate the idea against core product philosophies. (triggers: /product_alignment, /vet_idea, vet this idea, check product alignment)
 ---
 

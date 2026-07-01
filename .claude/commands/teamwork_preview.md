@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Triggers whenever the user wants to dispatch a swarm or subagent via [/teamwork-preview]. Enforces the Swarm Lock Ledger Protocol before dispatch. (triggers: /teamwork-preview)
 ---
 
@@ -14,7 +15,16 @@ Before you invoke any subagents using the `invoke_subagent` tool, you **MUST** p
 - **HALT CHECK:** If you have not successfully modified the Markdown file and verified the changes, you are STRICTLY FORBIDDEN from calling the `invoke_subagent` tool.
 
 ### 2. Dispatch
-- After the Swarm Lock is visually established in the file, use your `invoke_subagent` tool to launch the swarms into the background.
+- After the Swarm Lock is visually established in the file, use your subagent tool to launch the swarms into the background.
+- **Standard Subagent Roster (pinned models):** prefer the named agents in `.claude/agents/` — each carries its own model tier, so do not pass a `model` override unless escalating:
+  - `explore-mapper` (haiku) — read-only touch-point mapping
+  - `test-lint-runner` (haiku) — runs `npm test` + `npx eslint .`
+  - `security-scout` (sonnet) — enumerates XSS violations via `scripts/xss-audit.js`
+  - `implementation-planner` (sonnet) — writes plans to `docs/plans/`
+  - `xss-validator` (sonnet) — before/after XSS diff
+  - `test-guide-generator` (sonnet) — manual testing guides
+  - `implementer` (sonnet; `model: opus` override for security-critical files) — executes an approved plan
+  - For deep adversarial scans, invoke `/red_team` (opus) rather than a generic agent.
 
 ### 3. Confirmation
 - Once launched, confirm to the user using standard markdown (not plain text).

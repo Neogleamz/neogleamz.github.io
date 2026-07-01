@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Alias for /supabase_sync (Gemini name: supabase_schema_sync). Enforce infrastructure-as-code, push schema changes, and sync database docs to the Master Reference.
 ---
 

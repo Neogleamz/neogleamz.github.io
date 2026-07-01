@@ -26,9 +26,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all high priority active epics successfully completed and archived!* ✅
 
 ### 🟡 P2 Medium Priority (Enhancements & Automation)
-
-#### Target: `main`
-- [ ] `chore/agent-model-tiering` : **Agent Model & Effort Tiering** - Assign every command, skill, and recurring subagent role a deliberate model tier (Balanced strategy: Haiku for mechanical, Sonnet for structured workflows, Opus for deep/adversarial reasoning). Implement via `model:` frontmatter pins on all entry points (canonical + alias + skill) plus 7 named `.claude/agents/*.md` definitions so `/bucketlist` swarm dispatches stop inheriting the parent tier. (Plan: [docs/plans/chore/agent-model-tiering.md](../docs/plans/chore/agent-model-tiering.md)) [Files: .claude/commands/*.md, .claude/skills/*/SKILL.md, .claude/agents/*.md, CLAUDE.md]
+*Clean sweep — all P2 enhancements successfully completed and archived!* ✅
 
 ## 🧹 Technical Debt
 
@@ -37,6 +35,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Agent Model & Effort Tiering**
+*(Archived — 2026-07-01)*
+- [x] `chore/agent-model-tiering` : **Agent Model & Effort Tiering** - Assign every command, skill, and recurring subagent role a deliberate model tier (Balanced strategy: Haiku for mechanical, Sonnet for structured workflows, Opus for deep/adversarial reasoning). Implemented via `model:` frontmatter pins on all 68 entry points (52 commands + 16 skills; haiku 23 / sonnet 29 / opus 16) plus 7 named `.claude/agents/*.md` definitions (explore-mapper, test-lint-runner, security-scout, implementation-planner, xss-validator, test-guide-generator, implementer) so `/bucketlist` swarm dispatches stop inheriting the parent tier. Reprosed bucketlist + teamwork_preview to dispatch named agents; documented taxonomy in CLAUDE.md. Verified: 0 XSS, 59/59 tests, 0 lint errors, 0 alias drift across 15 pairs. (Plan: [docs/plans/chore/agent-model-tiering.md](../docs/plans/chore/agent-model-tiering.md)) [Files: .claude/commands/*.md, .claude/skills/*/SKILL.md, .claude/agents/*.md, CLAUDE.md]
 
 ### Target: `debt/security` + `debt/hygiene`
 **Epic: Technical Debt Sweep — Security Hardening + DOM Hygiene (Full)**

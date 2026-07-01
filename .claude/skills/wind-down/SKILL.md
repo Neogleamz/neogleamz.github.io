@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: wind-down
 description: End-of-session sync: docs, ledger, cleanup, commit. Use when the user says "wind down", "end session", or "wrap up".
 ---

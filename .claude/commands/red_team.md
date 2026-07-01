@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Forces a strict persona shift where the AI acts as a malicious Penetration Tester to proactively scan Vanilla JS modules for DOM clobbering, injection vectors, and XSS exploits prior to release. (triggers: /red_team, /hack, pentest this, attack surface)
 ---
 

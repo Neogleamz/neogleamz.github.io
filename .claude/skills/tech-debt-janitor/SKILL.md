@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: tech-debt-janitor
 description: Full codebase health check: audit dependencies, hunt TODO/FIXME/HACK, scan for unguarded innerHTML, check for hardcoded secrets and legacy var declarations, triage findings into the bucket list. Use when the user says "health check", "audit the codebase", or "/health-check".
 ---

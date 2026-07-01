@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Executes safety checkpoints or destructive rollbacks to protect the codebase from rabbit holes and broken states. (triggers: /checkpoint, /abort, save point, revert, restart)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

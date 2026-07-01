@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: A strict diagnostic workflow to visually analyze and correct Vanilla DOM layout collisions by structurally highlighting boundaries. (triggers: /ui_xray, /xray, debug css layout, show boundaries)
 ---
 

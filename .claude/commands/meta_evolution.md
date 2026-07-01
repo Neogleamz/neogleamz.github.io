@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Triggers when the agent detects repeated user corrections, or when the user invokes '/evolve', to permanently update the agent's core instructions. (triggers: /evolve, /meta_evolution, update your rules, learn this)
 ---
 

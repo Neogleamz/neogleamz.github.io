@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: silent-release
 description: Log changes to the changelog without a version bump. Use when the user says "silent release" or "log to changelog".
 ---

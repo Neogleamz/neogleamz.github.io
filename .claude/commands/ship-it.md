@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Audit, QA-gate, and merge the current feature branch into its base (Release Manager sequence).
 argument-hint: "[base-branch] (optional; otherwise inferred or asked)"
 allowed-tools: Bash(git*), Bash(npm test), Bash(npm run*), Bash(npx eslint*), Read, Edit, Grep, Glob

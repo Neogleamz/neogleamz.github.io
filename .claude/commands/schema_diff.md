@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: A strict diagnostic workflow for analyzing the drift between local Supabase migrations and remote database architecture to prevent destructive push collisions. (triggers: /schema_diff, /schema-diff, check database, check schema, database drift)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

@@ -104,21 +104,35 @@ The database is the source of truth. When frontend logic needs fuzzy matching / 
 ## Verification mandate
 No unverified "it's fixed." Prove it — run Node/scripts to check data structures, parse DOM/SVG coords for layout, show the receipts. Write throwaway verification scripts to `scratch/` (gitignored).
 
+## Model & Effort Tiering
+
+Every command, skill, and subagent declares a `model:` in its frontmatter (Balanced strategy). Effort *is* model tier — pick the tier by cognitive load, not by how important the task feels. When authoring a new command/skill, add a `model:` line:
+
+- **`haiku` — Mechanical:** deterministic git/file/checklist ops and text transforms with near-zero reasoning (`/save-point`, `/status-update`, `/gitcleanup`, `/silent-release`, `/idea_intake` log step, `/jargon_brake`, `/rubber_duck`).
+- **`sonnet` — Structured judgment:** gate-driven workflows needing real diff/pass-fail judgment (`/ship-it`, `/release`, `/wind-down`, `/bucketlist`, `/tech-debt-janitor`, `/legacy-audit`, `/health_check`, `/dependency_diet`).
+- **`opus` — Deep / adversarial:** creative, critical, architecture, or security reasoning where quality dominates cost (`/brainstorm`, `/whiteboard_mode`, `/devils-advocate`, `/red_team`, `/product_teardown`, `/debug-drill`, `/bug-hunter`, `/panic-button`, `/meta_evolution`).
+
+**Alias/skill twins must match:** a command, its `_`/`-` alias, and its skill are separate entry points; the model is set by whichever file is invoked. Pin the same tier on all twins or they drift.
+
+**Named subagents** live in `.claude/agents/` and each carries a pinned model — dispatch them by `subagent_type` and do NOT pass a `model` override unless escalating an `implementer` to `opus` for a security-critical file: `explore-mapper` (haiku), `test-lint-runner` (haiku), `security-scout` (sonnet), `implementation-planner` (sonnet), `xss-validator` (sonnet), `test-guide-generator` (sonnet), `implementer` (sonnet).
+
+**Precedence caveat:** an explicit `/model` session setting may override command frontmatter. If you need a command to run at its declared tier, avoid forcing a conflicting session model. Verify current precedence behavior before relying on it for cost-sensitive swarms.
+
 ## Subagent mandates
 
 ### Pre-task research swarm (required for every bucket list task)
-Before writing any implementation code, spawn these agents **in parallel**:
-1. **Explore agent** — map every file and line that the task will touch. Include callers, imports, DOM IDs, Supabase table names. Returns the full touch-point map.
-2. **Plan agent** — using the explore agent's map plus the task description, CLAUDE.md rules, and the Master Reference, generate a detailed implementation plan covering: security considerations (XSS, RLS), Vanilla JS constraints, 4-state UX, UI mutex where needed, and any schema changes. Save to `docs/plans/<branch>.md`.
-3. **Security scout** (required for any XSS/security fix) — run `node scripts/xss-audit.js --warn` focused on the target file(s); enumerate every violation that the task must resolve so nothing is missed mid-implementation.
+Before writing any implementation code, spawn these agents **in parallel** (use the pinned named subagents in `.claude/agents/`):
+1. **Explore agent** (`explore-mapper` · haiku) — map every file and line that the task will touch. Include callers, imports, DOM IDs, Supabase table names. Returns the full touch-point map.
+2. **Plan agent** (`implementation-planner` · sonnet) — using the explore agent's map plus the task description, CLAUDE.md rules, and the Master Reference, generate a detailed implementation plan covering: security considerations (XSS, RLS), Vanilla JS constraints, 4-state UX, UI mutex where needed, and any schema changes. Save to `docs/plans/<branch>.md`.
+3. **Security scout** (`security-scout` · sonnet; required for any XSS/security fix) — run `node scripts/xss-audit.js --warn` focused on the target file(s); enumerate every violation that the task must resolve so nothing is missed mid-implementation.
 
 HALT and present the plan to the user before writing any code.
 
 ### Post-task validation swarm (required after every implementation)
-After editing files but **before committing**, spawn these agents **in parallel**:
-1. **XSS validator** — run `node scripts/xss-audit.js --warn` and confirm: (a) the violations the task was supposed to fix are gone, (b) no new violations were introduced.
-2. **Test + lint runner** — run `npm test` and `npx eslint .`; capture counts and any failures.
-3. **Manual test guide generator** — produce a fully detailed testing guide (see format below) for every changed surface, covering happy path, error states, regression checks, and Supabase/DB verification steps.
+After editing files but **before committing**, spawn these agents **in parallel** (use the pinned named subagents in `.claude/agents/`):
+1. **XSS validator** (`xss-validator` · sonnet) — run `node scripts/xss-audit.js --warn` and confirm: (a) the violations the task was supposed to fix are gone, (b) no new violations were introduced.
+2. **Test + lint runner** (`test-lint-runner` · haiku) — run `npm test` and `npx eslint .`; capture counts and any failures.
+3. **Manual test guide generator** (`test-guide-generator` · sonnet) — produce a fully detailed testing guide (see format below) for every changed surface, covering happy path, error states, regression checks, and Supabase/DB verification steps.
 
 Do not commit until all three agents have returned and their results are clean or explicitly accepted by the user.
 

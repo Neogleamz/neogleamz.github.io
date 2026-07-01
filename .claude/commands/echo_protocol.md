@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: A strict active-listening checkpoint triggered to verify alignment, assumptions, and scope before executing complex tasks. (triggers: /echo, /playback, Are you following, Do you understand, Make sense?, Playback)
 ---
 

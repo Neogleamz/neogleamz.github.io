@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Alias for /debug-drill (Gemini name: debug_drill). Emergency debug mode that instruments code with logs and forces theory formation before applying fixes.
 ---
 

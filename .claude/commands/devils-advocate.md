@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Forces a critical persona shift to stress-test ideas and identify production flaws before planning begins. (triggers: /devils_advocate, roast this idea, pre-mortem, find the flaws in)
 ---
 

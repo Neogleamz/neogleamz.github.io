@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Alias for /rubber_duck (Gemini name: rubber_duck_eli5). Pause before complex implementation to provide an ELI5 explanation and verify logic before writing code.
 ---
 

@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Alias for /isolated-test (Gemini name: isolated_test_and_verify). QA workflow that verifies recent changes on a local server before committing.
 ---
 

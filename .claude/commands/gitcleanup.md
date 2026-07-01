@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Safely parses and prunes local Git branches that have already been merged. (triggers: /repo_cleanup, /cleanup, clean up the repository, clean up repo)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

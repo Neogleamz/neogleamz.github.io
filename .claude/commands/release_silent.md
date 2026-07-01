@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Alias for /silent-release (Gemini name: release_silent). Update the bucket list and changelog without a version bump or git tag.
 ---
 
