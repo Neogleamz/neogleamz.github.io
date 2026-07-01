@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Alias for /intake (Gemini name: zero_bypass_intake). Emergency pivot protocol for urgent hotfixes — stashes WIP and injects into P0 queue.
 ---
 

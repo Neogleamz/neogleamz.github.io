@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Triggers whenever the user requests a modification to a Supabase database table, RLS logic, or schema migration to ensure documentation stays synced. (triggers: /sync_db, /supabase_sync, sync the database, update schema docs)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

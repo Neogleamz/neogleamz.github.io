@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: rubber_duck
 description: Pause before complex implementation to provide an ELI5 explanation and verify logic with the user before writing code. Use when the user says "explain this to me", "walk me through", "eli5", or before tackling hardware payloads, DB migrations, or complex DOM logic.
 ---

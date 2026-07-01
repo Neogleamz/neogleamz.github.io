@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Alias for /product_alignment (Gemini name: product_alignment_check). Validate proposed features against the SK8Lytz Product Bible before implementation.
 ---
 

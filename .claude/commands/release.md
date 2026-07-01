@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Alias for /release-manager (Gemini name: release). Cut a formal release with version bump, changelog generation, and git tag.
 ---
 

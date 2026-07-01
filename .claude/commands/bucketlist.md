@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: The primary project engine. Automates branching, planning, execution, and documentation for the next item on the Bucket List.
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---
@@ -25,14 +26,14 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
 
 3. **Pre-Task Intelligence Swarm (MANDATORY — spawn all agents in parallel before writing any code)**:
 
-   Dispatch the following agents simultaneously using the Agent tool in a **single message** — one Agent A + one Agent B per task in the parallel batch, plus one shared Agent C:
+   Dispatch the following agents simultaneously using the Agent tool in a **single message** — one Agent A + one Agent B per task in the parallel batch, plus one shared Agent C. Use the **named subagents** below (defined in `.claude/agents/`); each carries a pinned model tier via its own frontmatter, so do NOT pass a `model` override unless explicitly noted:
 
    For **each task `i`** in the parallel batch:
-   - **Agent A_i — Touch-Point Mapper (Explore):** Read every file that task `i` will modify or that calls the affected function/component. Map DOM IDs, Supabase table names, module imports, and event-delegator tokens. Return a complete touch-point inventory for that specific task.
-   - **Agent B_i — Implementation Planner (Plan):** Using Agent A_i's map, the task description, CLAUDE.md rules, and the Master Reference, generate a detailed plan for task `i` covering: security (XSS guards, RLS), Vanilla JS constraints (no `var`), 4-state UX, UI mutex for mutations, zero-refresh re-render, and schema changes. Save to `docs/plans/<extracted-branch-slug>-<i>.md`.
+   - **Agent A_i — Touch-Point Mapper** (`subagent_type: explore-mapper` · haiku): Read every file that task `i` will modify or that calls the affected function/component. Map DOM IDs, Supabase table names, module imports, and event-delegator tokens. Return a complete touch-point inventory for that specific task.
+   - **Agent B_i — Implementation Planner** (`subagent_type: implementation-planner` · sonnet): Using Agent A_i's map, the task description, CLAUDE.md rules, and the Master Reference, generate a detailed plan for task `i` covering: security (XSS guards, RLS), Vanilla JS constraints (no `var`), 4-state UX, UI mutex for mutations, zero-refresh re-render, and schema changes. Save to `docs/plans/<extracted-branch-slug>-<i>.md`.
 
    Plus one shared agent for the entire batch:
-   - **Agent C — Security Scout (required for XSS/security tasks):** Run `node scripts/xss-audit.js --warn` focused on ALL target files in the batch. Enumerate every violation across all files that the batch must resolve. If no tasks are security-related, skip.
+   - **Agent C — Security Scout** (`subagent_type: security-scout` · sonnet; required for XSS/security tasks): Run `node scripts/xss-audit.js --warn` focused on ALL target files in the batch. Enumerate every violation across all files that the batch must resolve. If no tasks are security-related, skip.
 
    Once all agents return, synthesize outputs into a **combined batch plan**, then:
    - **HALT ALL ACTION.** Ask: *"Pre-task intelligence complete for [N] parallel tasks. Review the batch plan above. Type 'proceed' to execute all, or provide feedback."* Do not write code until approved.
@@ -42,7 +43,7 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - If requirements are clear: proceed to Execute.
 
 5. **Execute Work (parallel)**:
-   - Once the user types "proceed", dispatch one implementation agent per task in the batch **simultaneously** in a single message.
+   - Once the user types "proceed", dispatch one `implementer` subagent (`subagent_type: implementer` · sonnet) per task in the batch **simultaneously** in a single message. For any task whose target file is **security-critical** (auth, RLS-adjacent, payment/webhook, or a heavy XSS refactor), pass a `model: opus` override on that specific dispatch.
    - Each agent receives its specific approved plan (from Agent B_i) and edits ONLY its designated file(s). Since each agent targets different files, concurrent writes are safe — no worktrees needed.
    - For XSS fixes: each agent uses only the allowed patterns from CLAUDE.md §DOM security and confirms its specific violation line is gone before returning.
    - Wait for all implementation agents to return before proceeding.
@@ -51,9 +52,9 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
 
    Dispatch the following agents simultaneously:
 
-   - **Agent V1 — XSS Validator:** Run `node scripts/xss-audit.js --warn` on the full codebase. Confirm: (a) every violation across ALL files the batch was responsible for is no longer present, (b) no new violations were introduced. Return a before/after violation count.
-   - **Agent V2 — Test + Lint Runner:** Run `npm test` and `npx eslint .`. Return: test pass/fail counts, ESLint error/warning counts, and any failures with file:line details.
-   - **Agent V3 — Manual Test Guide Generator:** Given all changed files and task descriptions in the batch, generate a combined testing guide using the exact format in CLAUDE.md §Subagent mandates. Cover each surface changed by the batch: happy path, error/edge cases, regression checks, and Supabase DB verification where applicable.
+   - **Agent V1 — XSS Validator** (`subagent_type: xss-validator` · sonnet): Run `node scripts/xss-audit.js --warn` on the full codebase. Confirm: (a) every violation across ALL files the batch was responsible for is no longer present, (b) no new violations were introduced. Return a before/after violation count.
+   - **Agent V2 — Test + Lint Runner** (`subagent_type: test-lint-runner` · haiku): Run `npm test` and `npx eslint .`. Return: test pass/fail counts, ESLint error/warning counts, and any failures with file:line details.
+   - **Agent V3 — Manual Test Guide Generator** (`subagent_type: test-guide-generator` · sonnet): Given all changed files and task descriptions in the batch, generate a combined testing guide using the exact format in CLAUDE.md §Subagent mandates. Cover each surface changed by the batch: happy path, error/edge cases, regression checks, and Supabase DB verification where applicable.
 
    **HALT if V1 or V2 returns failures.** Present the failures and ask the user whether to fix or abort. Do not commit until both pass (or user explicitly accepts).
 

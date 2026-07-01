@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Alias for /simulated-user (Gemini name: simulate_ux). Adopt a novice worker persona to evaluate UI friction points and usability failures.
 ---
 

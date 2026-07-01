@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Triggers when the user requests to urgently pivot and execute a hotfix or major feature mid-session, interrupting their current workflow. (triggers: /zero_bypass_intake, pivot to this, fix this bug right now, emergency hotfix)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

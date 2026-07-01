@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Triggers when the user asks to create a new utility function, data calculation, or pure logic service to enforce TDD principles. (triggers: /tdd, /test_driven, write a test first, use tdd)
 ---
 

@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Handles the final un-boxing of an entire Epic branch into the Production trunk, automates stealth/public release notes, and archives the bucket list. (triggers: /finalize_epic, finalize epic, deploy epic)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

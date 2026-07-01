@@ -1,4 +1,5 @@
 ---
+model: opus
 name: bug-hunter
 description: Systematically root-cause a reported bug. Use when the user reports a bug, error, or stack trace and wants it hunted down.
 ---

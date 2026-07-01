@@ -1,4 +1,5 @@
 ---
+model: opus
 description: A strict diagnostic workflow that forces the AI to instrument code with logs and form theories before attempting to guess-fix a bug. (triggers: /emergency_debug_drill, debug this:, critical bug:, let's debug)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

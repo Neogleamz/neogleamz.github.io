@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Triggers whenever tasked with implementing highly complex logic, hardware payloads, or architecture to ensure human readability before coding. (triggers: /rubber_duck, /eli5, rubber duck this, explain like im 5)
 ---
 

@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: ship-it
 description: Finalize and merge a feature branch — runs the QA-gated Release Manager sequence (tests, lint, ledger, merge). Use when the user says "ship it", "merge this branch", "finalize branch", or "ship the feature".
 ---

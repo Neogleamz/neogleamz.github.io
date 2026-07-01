@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: jargon_brake
 description: Halt code generation and explain a confusing concept via plain-English analogies with a comprehension gate before resuming. Use when the user expresses confusion, asks "what does X mean", or says "I don't understand".
 ---

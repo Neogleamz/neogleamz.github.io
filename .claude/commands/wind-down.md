@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Executes the end-of-session synchronization, workspace sanitization, and state saving sequence. (triggers: /wind_down, /wind-down, end session, wind down, see you tomorrow)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

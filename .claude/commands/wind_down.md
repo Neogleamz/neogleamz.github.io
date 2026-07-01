@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Alias for /wind-down (Gemini name: wind_down). End-of-session sync: docs, ledger, cleanup, commit.
 ---
 

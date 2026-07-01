@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Workflow: product_teardown
 ---
 

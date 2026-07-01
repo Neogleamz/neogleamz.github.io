@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Alias for /tech-debt-janitor (Gemini name: health_check). Scans the codebase for vulnerabilities and technical debt, then triages findings into the bucket list.
 ---
 

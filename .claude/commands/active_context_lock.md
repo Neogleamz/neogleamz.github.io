@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: A continuous passive guardrail algorithm preventing catastrophic scope creep and cross-branch history contamination. (triggers: passive global rule)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

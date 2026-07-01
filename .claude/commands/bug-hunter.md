@@ -1,4 +1,5 @@
 ---
+model: opus
 description: A strict diagnostic workflow for analyzing stack traces, formulating theories, and awaiting authorization before writing code. (triggers: /bug_hunter, fix this error, fix this crash, fix this bug)
 ---
 

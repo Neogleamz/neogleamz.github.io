@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Alias for /devils-advocate (Gemini name: devils_advocate). Stress-test an idea by identifying production flaws before planning begins.
 ---
 

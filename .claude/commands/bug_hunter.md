@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Alias for /bug-hunter (Gemini name: bug_hunter). Systematically root-cause a reported bug from stack trace to fix snippet.
 ---
 

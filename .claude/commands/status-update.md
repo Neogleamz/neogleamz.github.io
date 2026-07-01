@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Generates a Situation Report (SITREP) based on current Git context and the Bucket List. (triggers: /status, whats up, status update, where are we, what's happening)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

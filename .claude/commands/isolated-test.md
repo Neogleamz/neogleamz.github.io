@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Executes a strict QA workflow to verify recent changes natively on 127.0.0.1:5500. (triggers: always_on)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

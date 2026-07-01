@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Alias for /brainstorm (Gemini name: whiteboard_mode). Read-only consultative persona for theory-crafting and architecture design without triggering code changes.
 ---
 

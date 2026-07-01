@@ -1,4 +1,5 @@
 ---
+model: opus
 name: panic-button
 description: Emergency stabilization / rollback. Use when the user says "panic", "emergency", "everything broke", or "roll it back".
 ---

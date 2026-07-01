@@ -1,4 +1,5 @@
 ---
+model: haiku
 description: Alias for /status-update (Gemini name: status_update). Generate a SITREP dashboard showing current Git context, active Epic progress, and next tasks.
 ---
 

@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: bucketlist
 description: Pull and execute the next task from the SK8Lytz Bucket List ledger. Use when the user says "bucketlist", "next task", "work the ledger", or asks what to work on next.
 ---

@@ -1,4 +1,5 @@
 ---
+model: sonnet
 description: Executes the version bump, changelog generation, and tagging sequence to cut a new release. (triggers: /release, cut a release, prepare release, draft release)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

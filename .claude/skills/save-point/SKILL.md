@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: save-point
 description: Create a checkpoint commit of current progress. Use when the user says "save point", "checkpoint", or "save my progress".
 ---

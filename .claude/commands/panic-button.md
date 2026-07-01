@@ -1,4 +1,5 @@
 ---
+model: opus
 description: Triggers a strict read-only diagnostic mode for when the project is broken but the user doesn't know why. (triggers: /panic, PANIC, everything is broken, emergency)
 allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 ---

@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: release-manager
 description: Cut a formal release with version bump and changelog. Use when the user says "release", "cut a release", or "bump the version".
 ---
