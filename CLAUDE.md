@@ -116,7 +116,7 @@ Every command, skill, and subagent declares a `model:` in its frontmatter (Balan
 
 **Named subagents** live in `.claude/agents/` and each carries a pinned model — dispatch them by `subagent_type` and do NOT pass a `model` override unless escalating an `implementer` to `opus` for a security-critical file: `explore-mapper` (haiku), `test-lint-runner` (haiku), `security-scout` (sonnet), `implementation-planner` (sonnet), `xss-validator` (sonnet), `test-guide-generator` (sonnet), `implementer` (sonnet).
 
-**Precedence caveat:** an explicit `/model` session setting may override command frontmatter. If you need a command to run at its declared tier, avoid forcing a conflicting session model. Verify current precedence behavior before relying on it for cost-sensitive swarms.
+**Precedence (confirmed):** command/skill `model:` frontmatter is a soft, turn-scoped hint — an explicit `/model <name>` session pin dominates it in practice. `/model default` does not mean "use each command's declared tier"; it resets the session to your account's baseline model (e.g. Sonnet 5), which then applies everywhere just like any other pin. **Named subagents are the exception and the only reliably-enforced tier**: a `.claude/agents/*.md` file's `model:` sits above the parent/session model in the resolution chain, so `/bucketlist` swarm roles (explore-mapper, implementer, etc.) stay on their pinned tier even while the session sits on Opus. Bottom line: don't rely on command-level frontmatter to control cost — rely on the named subagents for that, and treat command frontmatter as documentation of intent.
 
 ## Subagent mandates
 
