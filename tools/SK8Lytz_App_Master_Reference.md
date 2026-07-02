@@ -58,6 +58,7 @@ graph LR
         MK_Builder --> RecipeManagerModal[RECIPE MANAGER STAGING Modal<br>Btn: 🛠️ MANAGER]
         MK_Builder --> BulkAddModal[Bulk Add Modal<br>Btn: BULK ADD]
         MK_Builder --> RecipeAddPart[Add BOM Part Action<br>Btn: Add Part]
+        MK_Builder --> RecipeSearchFilter[Live Recipe Search Filter<br>Input: 🔍 Search recipes...]
         MK_Builder --> RecipeFixPredictions[Apply All Suggestions Action<br>Btn: FIX ALL PREDICTIONS]
         MK_Builder --> RecipeCommitFixes[Commit Manager Fixes Action<br>Btn: COMMIT FIXES]
         
@@ -577,6 +578,7 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 - **`paneProdBuilder` (RECIPEZ)**:
   - Contains `recipeActionModal` triggers to actively map Raw Goods arrays against Final SKUs.
   - Integrates the `Recipe Integrity Manager` (`recipeManagerModal`) which utilizes an intelligent "Fix All" bulk-predictions loop (`window.applyAllRecipeSuggestions`) to iteratively fuzzy-match and auto-repair orphaned Component Keys dynamically before committing changes back to the Supabase layer.
+  - `#recipeSearchInput` / `#recipeSearchEmptyState`: client-side live filter (`window.filterRecipeList`) over recipe names, case-insensitive substring match, applied simultaneously across all 4 recipe categories (RETAIL, SUB-ASSEMBLIES, 3D PRINTS, CUSTOM LABELZ). No DB write; restores prior category collapse/expand state on clear; shows `#recipeSearchEmptyState` when zero matches.
 - **`paneProdControl` (BATCHEZ)**:
   - Controls work order states (Pending, Core Processing).
 - **`paneProdPrint` (LAYERZ)**:
