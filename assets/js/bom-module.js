@@ -349,7 +349,51 @@ window.renderProductList = function() {
 
     ui.innerHTML = window.safeHTML(html);
     if(currentProduct) window.renderProductBOM();
+    if (typeof window.filterRecipeList === 'function') window.filterRecipeList();
 }
+
+window.filterRecipeList = function() {
+    const input = document.getElementById('recipeSearchInput');
+    const term = input ? input.value.toLowerCase().trim() : '';
+    const emptyState = document.getElementById('recipeSearchEmptyState');
+    const catIds = ['cat-retail', 'cat-sub', 'cat-3d', 'cat-labels'];
+    let totalVisible = 0;
+
+    catIds.forEach(catId => {
+        const catDiv = document.getElementById(catId);
+        if (!catDiv) return; // category has zero products this render pass — no DOM node exists
+        const headerLi = document.querySelector(`li.neo-category-row[data-cat="${catId}"]`);
+        const items = catDiv.querySelectorAll('li[data-name]');
+        let visibleInCat = 0;
+
+        items.forEach(li => {
+            // Match against the *displayed* name span, NOT the data-name attribute.
+            // buildItem() (bom-module.js L248) escapes data-name with `.replace(/'/g, "\\'")`,
+            // which leaves a literal backslash in the attribute for any recipe name containing
+            // an apostrophe (e.g. "Skater's Special" -> data-name="Skater\'s Special"). Matching
+            // against that would silently break search for those recipes. The first <span> inside
+            // the <li> (L257: `<span>☰ ${n}</span>`) carries the real, unescaped display text.
+            const nameSpan = li.querySelector('span');
+            const displayName = (nameSpan ? nameSpan.textContent : (li.getAttribute('data-name') || '')).toLowerCase();
+            const matches = term === '' || displayName.includes(term);
+            li.style.display = matches ? '' : 'none';
+            if (matches) { visibleInCat++; totalVisible++; }
+        });
+
+        if (term === '') {
+            // Restore whatever collapse/expand state the user had before typing.
+            const isOpen = window.recipeGroupState ? window.recipeGroupState[catId] : true;
+            catDiv.style.display = isOpen ? 'block' : 'none';
+            if (headerLi) headerLi.style.display = '';
+        } else {
+            // Active search: force-expand categories that have a match, fully hide empty ones.
+            catDiv.style.display = visibleInCat > 0 ? 'block' : 'none';
+            if (headerLi) headerLi.style.display = visibleInCat > 0 ? '' : 'none';
+        }
+    });
+
+    if (emptyState) emptyState.style.display = (term !== '' && totalVisible === 0) ? 'block' : 'none';
+};
 
 function productDragStart(e, name) {
     productDraggedName = name;
