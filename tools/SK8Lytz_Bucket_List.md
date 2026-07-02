@@ -37,6 +37,18 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🗄️ Completed & Archived Epics
 
 ### Target: `main`
+**Epic: Technical Debt Sweep — Tooling Hardening + Dead Code (branch `debt/tooling`)**
+*(Archived — 2026-07-01)*
+*Logged by `/health_check` sweep — 2026-07-01. Executed as a 3-task parallel batch on `debt/tooling` (commit `1ed0399`). Verified: 0 XSS violations (before=0/after=0, blocking mode exit 0), 59/59 tests, 0 lint errors/warnings.*
+
+#### 🟠 Moderate — Tooling
+- [x] `debt/tooling` : **[.githooks/pre-commit:33](../.githooks/pre-commit)** — XSS audit gate still runs in `--warn` (advisory) mode, but the codebase has reached **0 violations**. Per the hook's own comment, remove `--warn` to make the gate blocking so new violations can never be committed. *Done — `--warn` removed, comment updated to blocking mode; the batch commit itself exercised the blocking gate live and passed.* (Plan: [docs/plans/debt/tooling-1.md](../docs/plans/debt/tooling-1.md)) [Files: .githooks/pre-commit]
+
+#### 🟡 Low — Dead Code
+- [x] `debt/dead-code` : **[sales-module.js:51](../assets/js/sales-module.js)** — `addManualSale()` is a fully orphaned feature remnant: zero callers, no `data-click` token, and the `manualSale*` form inputs it reads no longer exist anywhere in the DOM. Companion no-op at **[index.html:6349](../index.html)** populates the nonexistent `#manualSaleRecipe` dropdown (silently skipped via `if(manualDrop)` guard). Decide: delete both remnants, or rebuild/re-wire the Manual Sale entry form in REVENUEZ. *Done — DELETE option chosen: removed the 66-line function (old lines 51–116) and the 3-line populator block (old index.html 6348–6350); live `populateDropdowns()` and SALEZ CSV import flow verified intact.* (Plan: [docs/plans/debt/tooling-2.md](../docs/plans/debt/tooling-2.md)) [Files: assets/js/sales-module.js, index.html]
+- [x] `debt/dead-code` : **[packerz-module.js:213](../assets/js/packerz-module.js)** — `findDynamicShopifyVariant()` has zero callers repo-wide and carries an `eslint-disable-next-line no-unused-vars` suppression masking the fact. Delete the function and its suppression comment (or wire it into the alias-matching flow if it was meant to ship). *Done — DELETE option chosen: removed 41 lines (old 211–251) including the explanatory + eslint-disable comments; surviving barcode helpers `getDeterministic9DigitHash`/`getItemBarcodeValue` verified via 14/14 parity tests.* (Plan: [docs/plans/debt/tooling-3.md](../docs/plans/debt/tooling-3.md)) [Files: assets/js/packerz-module.js]
+
+### Target: `main`
 **Epic: RECIPEZ Quality-of-Life**
 *(Archived — 2026-07-01)*
 - [🚀] `feat/recipez-search-filter` : **RECIPEZ Search Filter** - Add a live-filter search box to the RECIPEZ sidebar so users can type to instantly narrow the recipe list by substring (e.g., typing "Haloz" shows only recipes containing "Haloz"). Real-time filtering, case-insensitive, works across all categories (RETAIL, SUB-ASSEMBLIES, 3D PRINTS, CUSTOM LABELS). Implemented via `#recipeSearchInput` + `window.filterRecipeList()` display-toggling (no innerHTML — zero new XSS surface), wired through the `data-input` delegator, with a zero-refresh hook inside `renderProductList()` so the filter survives every list re-render. Note: ledger originally declared `production-module.js`, but the recipe list renderer actually lives in `bom-module.js` (verified by grep during planning). Verified: 0 XSS violations, 59/59 tests, 0 lint errors/warnings. (Plan: [docs/plans/feat/recipez-search-filter.md](../docs/plans/feat/recipez-search-filter.md)) [Files: index.html, assets/js/bom-module.js, assets/js/system-event-delegator.js, tools/SK8Lytz_App_Master_Reference.md]
