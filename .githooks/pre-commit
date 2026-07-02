@@ -28,9 +28,9 @@ try {
   }
 
   // 2. XSS audit — scans index.html + assets/js/ for forbidden DOM injection patterns.
-  // Running in --warn (advisory) mode until all known violations in the Bucket List
-  // § 🧹 Technical Debt are resolved. After that, remove --warn to make this blocking.
-  execSync('node scripts/xss-audit.js --warn', { stdio: 'inherit' });
+  // Blocking mode: all known violations in the Bucket List § 🧹 Technical Debt have
+  // been resolved (0 violations as of 2026-07-01). Any new violation aborts the commit.
+  execSync('node scripts/xss-audit.js', { stdio: 'inherit' });
 
   // 3. Automated version bump
   execSync('npm run version:bump', { stdio: 'inherit' });
