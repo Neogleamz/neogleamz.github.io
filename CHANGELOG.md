@@ -1,8 +1,17 @@
 # SK8Lytz Application Changelog
 
-## [Unreleased]
-- `feat/recipez-search-filter` : **RECIPEZ Search Filter** — Added a live-filter search box to the RECIPEZ sidebar (`#recipeSearchInput`, MAKERZ hub). Case-insensitive substring filtering on every keystroke across all 4 recipe categories (RETAIL, SUB-ASSEMBLIES, 3D PRINTS, CUSTOM LABELZ) via pure `style.display` toggling (`window.filterRecipeList()` in bom-module.js — no innerHTML, zero new XSS surface). Wired through the `data-input` delegator token; zero-refresh hook in `renderProductList()` re-applies the filter after every list re-render; category collapse state restored on clear; "No recipes found matching search." empty state. Verified: 0 XSS, 59/59 tests, 0 lint.
-- `chore/agent-model-tiering` : **Agent Model & Effort Tiering** — Assigned every command, skill, and subagent a deliberate model tier (Balanced strategy). Added `model:` frontmatter to all 68 entry points (52 commands + 16 skills; haiku 23 / sonnet 29 / opus 16) and created 7 named `.claude/agents/` subagents (explore-mapper, test-lint-runner, security-scout, implementation-planner, xss-validator, test-guide-generator, implementer) with pinned tiers so `/bucketlist` swarm dispatches stop inheriting the parent model. Reprosed bucketlist + teamwork_preview to dispatch named agents; documented the taxonomy in CLAUDE.md. Config-only — 0 XSS, 59/59 tests, 0 lint errors, 0 alias drift across 15 twin pairs.
+## [1.5.2] - 2026-07-02
+
+### ✨ Features & Enhancements
+- **RECIPEZ Search Filter** (`feat/recipez-search-filter`) — Added a live-filter search box to the RECIPEZ sidebar (`#recipeSearchInput`, MAKERZ hub). Case-insensitive substring filtering on every keystroke across all 4 recipe categories (RETAIL, SUB-ASSEMBLIES, 3D PRINTS, CUSTOM LABELZ) via pure `style.display` toggling (`window.filterRecipeList()` in bom-module.js — no innerHTML, zero new XSS surface). Wired through the `data-input` delegator token; zero-refresh hook in `renderProductList()` re-applies the filter after every list re-render; category collapse state restored on clear; "No recipes found matching search." empty state. Verified: 0 XSS, 59/59 tests, 0 lint.
+
+### 🔒 Security & Tooling Hardening
+- **Pre-commit XSS gate promoted to blocking mode** (`debt/tooling`) — `.githooks/pre-commit` now runs `node scripts/xss-audit.js` without `--warn`: any new forbidden DOM-injection pattern aborts the commit before it can reach the public Pages deploy. Enabled by the codebase reaching 0 violations; the gate was verified live on the shipping commits themselves.
+
+### 🧹 Chores & Cleanup
+- **Agent Model & Effort Tiering** (`chore/agent-model-tiering`) — Assigned every command, skill, and subagent a deliberate model tier (Balanced strategy). Added `model:` frontmatter to all 68 entry points (52 commands + 16 skills; haiku 23 / sonnet 29 / opus 16) and created 7 named `.claude/agents/` subagents (explore-mapper, test-lint-runner, security-scout, implementation-planner, xss-validator, test-guide-generator, implementer) with pinned tiers so `/bucketlist` swarm dispatches stop inheriting the parent model. Reprosed bucketlist + teamwork_preview to dispatch named agents; documented the taxonomy in CLAUDE.md. Config-only — 0 XSS, 59/59 tests, 0 lint errors, 0 alias drift across 15 twin pairs.
+- **Dead code removal — `addManualSale()`** (`debt/dead-code`) — Deleted the 66-line orphaned manual-sale entry function from sales-module.js (zero callers; its `manualSale*` form inputs no longer existed anywhere in the DOM) plus the dead `#manualSaleRecipe` dropdown populator inside index.html's `populateDropdowns()`. Live SALEZ CSV import flow and all sibling dropdowns verified intact.
+- **Dead code removal — `findDynamicShopifyVariant()`** (`debt/dead-code`) — Deleted the 41-line orphaned Shopify variant matcher from packerz-module.js (zero callers, masked by an `eslint-disable no-unused-vars` suppression). Surviving barcode helpers `getDeterministic9DigitHash`/`getItemBarcodeValue` verified via 14/14 parity tests.
 
 ## [1.5.1] - 2026-07-01
 
