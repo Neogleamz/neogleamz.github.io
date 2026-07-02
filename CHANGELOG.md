@@ -1,6 +1,7 @@
 # SK8Lytz Application Changelog
 
 ## [Unreleased]
+- `feat/recipez-search-filter` : **RECIPEZ Search Filter** — Added a live-filter search box to the RECIPEZ sidebar (`#recipeSearchInput`, MAKERZ hub). Case-insensitive substring filtering on every keystroke across all 4 recipe categories (RETAIL, SUB-ASSEMBLIES, 3D PRINTS, CUSTOM LABELZ) via pure `style.display` toggling (`window.filterRecipeList()` in bom-module.js — no innerHTML, zero new XSS surface). Wired through the `data-input` delegator token; zero-refresh hook in `renderProductList()` re-applies the filter after every list re-render; category collapse state restored on clear; "No recipes found matching search." empty state. Verified: 0 XSS, 59/59 tests, 0 lint.
 - `chore/agent-model-tiering` : **Agent Model & Effort Tiering** — Assigned every command, skill, and subagent a deliberate model tier (Balanced strategy). Added `model:` frontmatter to all 68 entry points (52 commands + 16 skills; haiku 23 / sonnet 29 / opus 16) and created 7 named `.claude/agents/` subagents (explore-mapper, test-lint-runner, security-scout, implementation-planner, xss-validator, test-guide-generator, implementer) with pinned tiers so `/bucketlist` swarm dispatches stop inheriting the parent model. Reprosed bucketlist + teamwork_preview to dispatch named agents; documented the taxonomy in CLAUDE.md. Config-only — 0 XSS, 59/59 tests, 0 lint errors, 0 alias drift across 15 twin pairs.
 
 ## [1.5.1] - 2026-07-01
