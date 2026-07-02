@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/xss-audit.js --warn)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(node -e ' *)",
+      "Bash(awk 'NR==229{print length\\($0\\); print}' \"d:/GitHub/neogleamz.github.io/assets/js/packerz-module.js\")",
+      "Bash(awk 'NR==229{gsub\\(/[^ ]/,\"\",$0\\); print length\\($0\\)}' \"d:/GitHub/neogleamz.github.io/assets/js/packerz-module.js\")",
+      "Bash(awk 'NR==241{print length\\($0\\); print}' \"d:/GitHub/neogleamz.github.io/assets/js/packerz-module.js\")",
+      "Bash(grep -rn \"findDynamicShopifyVariant\" . --include=\"*.js\" --include=\"*.html\" --include=\"*.md\")",
+      "Bash(echo \"ESLINT EXIT CODE: $?\")"
+    ]
+  }
+}
