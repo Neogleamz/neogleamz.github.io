@@ -2014,6 +2014,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.updateRecipeManagerStaging(el);
                     }
                     break;
+                case 'input_window_filterRecipeList':
+                    if (typeof window.filterRecipeList === 'function') window.filterRecipeList();
+                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
