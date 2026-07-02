@@ -208,47 +208,6 @@ window.getDeterministic9DigitHash = function(str) {
     return String(100000000 + Math.abs(hash));
 };
 
-// Helper to find an unmapped Shopify-synced variant that dynamically matches the recipe or its mapped aliases
-// eslint-disable-next-line no-unused-vars
-function findDynamicShopifyVariant(recipeName) {
-    if (typeof aliasDB === 'undefined' || typeof window.aliasMetadataDB === 'undefined') return null;
-    
-    // Find all aliases currently mapped to this recipeName
-    const mappedAliases = Object.keys(aliasDB).filter(sku => aliasDB[sku] === recipeName);
-    
-    // Check all unmapped Shopify-synced variants
-    for (const sku of Object.keys(window.aliasMetadataDB)) {
-        const meta = window.aliasMetadataDB[sku];
-        if (!meta || !meta.is_shopify_synced || aliasDB[sku]) continue; // skip mapped
-        
-        const cleanSku = sku.toLowerCase();
-        
-        // 1. Compare with recipeName
-        const cleanRecipe = recipeName.toLowerCase();
-        const recipeWords = cleanRecipe.split(/[^a-z0-9]/).filter(w => w.length > 2);
-        const recipeMatch = cleanSku.includes(cleanRecipe) || 
-                            cleanRecipe.includes(cleanSku) ||
-                            (recipeWords.length > 0 && recipeWords.every(w => cleanSku.includes(w)));
-                            
-        if (recipeMatch) {
-            return { sku, barcode: meta.barcode_value };
-        }
-        
-        // 2. Compare with any mapped aliases
-        for (const alias of mappedAliases) {
-            const cleanAlias = alias.toLowerCase();
-            const aliasWords = cleanAlias.split(/[^a-z0-9]/).filter(w => w.length > 2);
-            const aliasMatch = cleanSku.includes(cleanAlias) || 
-                               cleanAlias.includes(cleanSku) ||
-                               (aliasWords.length > 0 && aliasWords.every(w => cleanSku.includes(w)));
-            if (aliasMatch) {
-                return { sku, barcode: meta.barcode_value };
-            }
-        }
-    }
-    return null;
-}
-
 window.getItemBarcodeValue = function(itemName) {
     if (!itemName) return '';
     
