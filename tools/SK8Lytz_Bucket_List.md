@@ -37,6 +37,11 @@ This document acts as the permanent, living task tracker integrated directly wit
 ## 🗄️ Completed & Archived Epics
 
 ### Target: `main`
+**Epic: RECIPEZ Quality-of-Life**
+*(Archived — 2026-07-01)*
+- [x] `feat/recipez-search-filter` : **RECIPEZ Search Filter** - Add a live-filter search box to the RECIPEZ sidebar so users can type to instantly narrow the recipe list by substring (e.g., typing "Haloz" shows only recipes containing "Haloz"). Real-time filtering, case-insensitive, works across all categories (RETAIL, SUB-ASSEMBLIES, 3D PRINTS, CUSTOM LABELS). Implemented via `#recipeSearchInput` + `window.filterRecipeList()` display-toggling (no innerHTML — zero new XSS surface), wired through the `data-input` delegator, with a zero-refresh hook inside `renderProductList()` so the filter survives every list re-render. Note: ledger originally declared `production-module.js`, but the recipe list renderer actually lives in `bom-module.js` (verified by grep during planning). Verified: 0 XSS violations, 59/59 tests, 0 lint errors/warnings. (Plan: [docs/plans/feat/recipez-search-filter.md](../docs/plans/feat/recipez-search-filter.md)) [Files: index.html, assets/js/bom-module.js, assets/js/system-event-delegator.js, tools/SK8Lytz_App_Master_Reference.md]
+
+### Target: `main`
 **Epic: Agent Model & Effort Tiering**
 *(Archived — 2026-07-01)*
 - [🚀] `chore/agent-model-tiering` : **Agent Model & Effort Tiering** - Assign every command, skill, and recurring subagent role a deliberate model tier (Balanced strategy: Haiku for mechanical, Sonnet for structured workflows, Opus for deep/adversarial reasoning). Implemented via `model:` frontmatter pins on all 68 entry points (52 commands + 16 skills; haiku 23 / sonnet 29 / opus 16) plus 7 named `.claude/agents/*.md` definitions (explore-mapper, test-lint-runner, security-scout, implementation-planner, xss-validator, test-guide-generator, implementer) so `/bucketlist` swarm dispatches stop inheriting the parent tier. Reprosed bucketlist + teamwork_preview to dispatch named agents; documented taxonomy in CLAUDE.md. Verified: 0 XSS, 59/59 tests, 0 lint errors, 0 alias drift across 15 pairs. (Plan: [docs/plans/chore/agent-model-tiering.md](../docs/plans/chore/agent-model-tiering.md)) [Files: .claude/commands/*.md, .claude/skills/*/SKILL.md, .claude/agents/*.md, CLAUDE.md]
