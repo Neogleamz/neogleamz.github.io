@@ -1,5 +1,9 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+- `debt/hygiene` : **Fossil Comment Cleanup** — Deleted 7 orphaned section-header comments (`// --- 6. BULK MODAL ---` through `// --- 13. NEW BACKUP & RESTORE SYSTEM ---`) from the tail of index.html's inline `<script>` block, left over from when those sections were extracted into `assets/js/*` modules. Confirmed the same headers remain legitimately active in their respective module files.
+- `debt/hygiene` : **Claude Code Permission Allowlist Prune** — Pruned `.claude/settings.json` from 9 to 3 durable Bash grants (`git checkout *`, `git pull *`, `xss-audit --warn`), removing 6 one-shot session grants tied to already-shipped/deleted code — including a malformed `node -e ' *` fragment that had left an effectively-unscoped arbitrary-JS-execution permission in place.
+
 ## [1.5.2] - 2026-07-02
 
 ### ✨ Features & Enhancements
