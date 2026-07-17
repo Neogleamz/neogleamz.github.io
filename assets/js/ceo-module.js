@@ -644,6 +644,7 @@ window.addCeoUnifiedSelection = function() {
 window._ltvSortKey = window._ltvSortKey || 'net';
 window._ltvSortAsc = window._ltvSortAsc !== undefined ? window._ltvSortAsc : false;
 
+// eslint-disable-next-line no-unused-vars -- called cross-file as a bare identifier from system-event-delegator.js (data-click="click_sortLtvModal"); declared writable in eslint.config.mjs globals
 function sortLtvModal(key) {
     if (window._ltvSortKey === key) {
         window._ltvSortAsc = !window._ltvSortAsc;
@@ -765,12 +766,9 @@ document.addEventListener('click', (e) => {
             let key = sortTh.getAttribute('data-ceosort');
             if (key) sortCeoTable(key);
         }
-        
-        const ltvTh = e.target.closest('th[data-ltvsort]');
-        if (ltvTh) {
-            let key = ltvTh.getAttribute('data-ltvsort');
-            if (key) sortLtvModal(key);
-        }
+        // click_sortLtvModal routing now owned exclusively by system-event-delegator.js
+        // (data-click="click_sortLtvModal" case) — this duplicate listener was firing
+        // sortLtvModal() a second time on every click, canceling out the asc/desc toggle.
     } catch (err) { console.error(err); }
 });
 

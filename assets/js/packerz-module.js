@@ -1507,7 +1507,8 @@ async function initPackerzAdmin() {
 setTimeout(initPackerzAdmin, 1500);
 
 window.filterPackerzAdminDropdown = async function() {
-    let _p = document.getElementById('packerzAdminRecipeSelect').value;
+    const recipeSelectEl = document.getElementById('packerzAdminRecipeSelect');
+    if (!recipeSelectEl) return;
     loadPackerzSopFromDB();
 }
 
@@ -1716,7 +1717,9 @@ window.renderPackerzTelemetryPreview = function renderPackerzTelemetryPreview() 
  * @returns {Promise<void>} Resolves when the admin editor has been populated and rendered.
  */
 async function loadPackerzSopFromDB() {
-    const sku = document.getElementById('packerzAdminRecipeSelect').value;
+    const recipeSelectEl = document.getElementById('packerzAdminRecipeSelect');
+    if (!recipeSelectEl) return;
+    const sku = recipeSelectEl.value;
     const wrapper = document.getElementById('packerzSopSplitWrapper');
     if (!wrapper) return;
 
@@ -1796,7 +1799,9 @@ async function loadPackerzSopFromDB() {
 }
 
 window.savePackerzSOPToDB = async function() {
-    const sku = document.getElementById('packerzAdminRecipeSelect').value;
+    const recipeSelectEl = document.getElementById('packerzAdminRecipeSelect');
+    if (!recipeSelectEl) return alert("Recipe selector not found on page.");
+    const sku = recipeSelectEl.value;
     if(!sku) return alert("Must select a Recipe first!");
 
     await executeWithButtonAction('btnSavePackerzSOP', 'UPLOADING PROTOCOLS...', '💾 SAVED SUCCESSFULLY!', async () => {
@@ -1818,7 +1823,9 @@ window.savePackerzSOPToDB = async function() {
             });
         });
 
-        let rawQa = document.getElementById('productionAdminQA').value;
+        const qaEl = document.getElementById('productionAdminQA');
+        if (!qaEl) throw new Error('QA checklist field (#productionAdminQA) not found on page.');
+        let rawQa = qaEl.value;
         let qaLines = rawQa.trim() === '' ? [] : rawQa.split('\n').map(l=>l.trim());
 
         let targetUuid = window.uuidToAllNamesMap ? Object.keys(window.uuidToAllNamesMap).find(uuid => window.uuidToAllNamesMap[uuid].includes(`RECIPE:::${sku}`) || window.uuidToAllNamesMap[uuid].includes(sku)) : sku;

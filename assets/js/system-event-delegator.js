@@ -644,6 +644,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_actualNetSort_g':
                     if (typeof actualNetSort === 'function') actualNetSort('g');
                     break;
+                case 'click_actualNetSort_a':
+                    if (typeof actualNetSort === 'function') actualNetSort('a');
+                    break;
                 case 'click_actualNetSort_c':
                     if (typeof actualNetSort === 'function') actualNetSort('c');
                     break;
@@ -812,6 +815,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_executeRestore':
                     executeRestore();
                     break;
+                case 'click_cancelRestore':
+                    if (typeof cancelRestore === 'function') cancelRestore();
+                    break;
                 case 'click_syncAndCalculate':
                     syncAndCalculate();
                     break;
@@ -856,6 +862,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_closeLtvModal':
                     closeLtvModal();
+                    break;
+                case 'click_sortLtvModal':
+                    if (typeof sortLtvModal === 'function') sortLtvModal(el.getAttribute('data-ltvsort'));
                     break;
                 case 'click_closeAnalyticsDashboard':
                     closeAnalyticsDashboard();
