@@ -7,6 +7,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "version:bump": "node scripts/bump-system-version.js",
+    "generate:nomenclature-dict": "node scripts/generate-nomenclature-dictionary.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."

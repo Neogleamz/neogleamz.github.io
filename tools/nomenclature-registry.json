@@ -1,0 +1,171 @@
+{
+  "$schema_version": "1.0.0",
+  "meta": {
+    "purpose": "Single machine-readable naming authority for Neogleamz OS (ADR: docs/architecture/nomenclature-audit-engine.md). Consumed by scripts/generate-nomenclature-dictionary.js (Phase 1) and scripts/nomenclature-audit.js (Phase 2, N1-N7 checks).",
+    "adr_ref": "docs/architecture/nomenclature-audit-engine.md",
+    "phase1_plan_ref": "docs/plans/feat-nomenclature-registry-1.md",
+    "generated_dictionary": "docs/nomenclature_dictionary.md",
+    "generator_script": "scripts/generate-nomenclature-dictionary.js",
+    "ratified_via": "Whiteboard session 2026-07-17 (D1-D9) + Phase 1 plan HALT-approval",
+    "ratified_date": "2026-07-17",
+    "design_principle": "This file stores PATTERNS and DOCUMENTED EXCEPTIONS, not an exhaustive per-identifier catalog of the ~564 delegator tokens / ~87 ghost lookups already inventoried by the epic's recon pass. Exhaustive occurrence-level findings are Phase 2 scanner (N1-N7) output, written to scripts/nomenclature-baseline.json, not this file (D5).",
+    "corrections_applied_2026_07_17": [
+      "tools/SK8Lytz_App_Master_Reference.md §0 and docs/nomenclature_dictionary.md both listed a 'DOM ID (Legacy)' column with values (invhub-tab, prodhub-tab, fulfillzhub-tab, salezhub-tab, socialzhub-tab, synchub-tab) that do not exist anywhere in index.html or assets/js/*.js (verified via repo-wide grep, zero code hits, doc-only). Corrected to the real live tab-content ids below, confirmed at index.html:1956,2077,2406,2596,2954,3354.",
+      "tools/SK8Lytz_App_Master_Reference.md §6B NEXUZ subsection referenced 'paneNexuzBrainz'/'paneNexuzImportz'/'paneNexuzSalez' — these ids do not exist in code either. Corrected to the real 'paneNexlBrainz'/'paneNexlImportz'/'paneNexlSalez' (index.html:3212,2995,3074), matching the ids already used correctly in both docs' own Mermaid diagrams."
+    ]
+  },
+  "hubs": {
+    "STOCKPILEZ": {
+      "emoji": "📊",
+      "tab_content_dom_id": "stockpilez-tab",
+      "tab_button_token": "click_switchTab_stockpilez",
+      "modules": ["inventory-module.js", "bom-module.js"],
+      "panes": {
+        "paneInventory": { "canonical_label": "STOCKZ", "embedded_legacy_terms": [], "rename_status": "canonical" },
+        "panePipeline": { "canonical_label": "DATAZ", "embedded_legacy_terms": [], "rename_status": "canonical" },
+        "paneSimple": { "canonical_label": "EDITZ", "embedded_legacy_terms": [], "rename_status": "canonical" }
+      }
+    },
+    "MAKERZ": {
+      "emoji": "🏭",
+      "tab_content_dom_id": "makerz-tab",
+      "tab_button_token": "click_switchTab_makerz",
+      "modules": ["production-module.js", "barcodz-module.js"],
+      "panes": {
+        "paneProdBuilder": { "canonical_label": "RECIPEZ", "embedded_legacy_terms": ["Prod"], "rename_status": "documented-alias-do-not-rename", "note": "Selected via static lookup object index.html:5211 (literal-matchable, not concatenation)." },
+        "paneProdControl": { "canonical_label": "BATCHEZ", "embedded_legacy_terms": ["Prod"], "rename_status": "documented-alias-do-not-rename" },
+        "paneProdPrint": { "canonical_label": "LAYERZ", "embedded_legacy_terms": ["Prod"], "rename_status": "documented-alias-do-not-rename" }
+      }
+    },
+    "FULFILLZ": {
+      "emoji": "📦",
+      "tab_content_dom_id": "fulfillz-tab",
+      "tab_button_token": "click_switchTab_fulfillz",
+      "modules": ["packerz-module.js", "print-module.js", "labelz-module.js"],
+      "panes": {
+        "paneFulfillzPackerz": { "canonical_label": "PACKERZ", "embedded_legacy_terms": [], "rename_status": "canonical" },
+        "paneFulfillzBarcodz": { "canonical_label": "BARCODZ", "embedded_legacy_terms": [], "rename_status": "canonical" },
+        "paneFulfillzLabelz": { "canonical_label": "LABELZ", "embedded_legacy_terms": [], "rename_status": "canonical" }
+      }
+    },
+    "REVENUEZ": {
+      "emoji": "🛒",
+      "tab_content_dom_id": "revenuez-tab",
+      "tab_button_token": "click_switchTab_revenuez",
+      "modules": ["sales-module.js", "ceo-module.js"],
+      "panes": {
+        "paneSalezBridge": { "canonical_label": "ORDERZ", "embedded_legacy_terms": ["Salez", "Bridge"], "rename_status": "documented-alias-do-not-rename", "note": "Selected via runtime string concatenation index.html:5196 — see dynamic_id_allowlist 'paneSalez*'." },
+        "paneSalezAnalyticz": { "canonical_label": "STATZ", "embedded_legacy_terms": ["Salez"], "rename_status": "documented-alias-do-not-rename" },
+        "paneSalezCommandz": { "canonical_label": "SIMULATORZ", "embedded_legacy_terms": ["Salez"], "rename_status": "documented-alias-do-not-rename" }
+      }
+    },
+    "SOCIALZ": {
+      "emoji": "👥",
+      "tab_content_dom_id": "socialz-tab",
+      "tab_button_token": "click_switchTab_socialz",
+      "modules": ["socialz-module.js"],
+      "panes": {
+        "paneSocialzRoster": { "canonical_label": "ROSTER", "embedded_legacy_terms": [], "rename_status": "canonical" }
+      }
+    },
+    "NEXUZ": {
+      "emoji": "⚡",
+      "tab_content_dom_id": "nexuz-tab",
+      "tab_button_token": "click_switchTab_nexl",
+      "tab_button_token_status": "documented-alias-do-not-rename",
+      "tab_button_token_note": "Token name carries a stale 'nexl' term though behavior is correct (routes to switchTab('nexuz')). See legacy_token_aliases.click_switchTab_nexl. FM-5: any rename requires an atomic single-commit edit of both the emitter (index.html:1931) and the delegator case (system-event-delegator.js:83) — the switch(action) block has no default: case, so a partial rename silently disables the button.",
+      "modules": ["system-tools-module.js", "task-engine.js"],
+      "panes": {
+        "paneNexlImportz": { "canonical_label": "IMPORTZ", "embedded_legacy_terms": ["Nexl"], "rename_status": "documented-alias-do-not-rename", "note": "Selected via static lookup object index.html:5249 (literal-matchable, not concatenation)." },
+        "paneNexlSalez": { "canonical_label": "SALEZ", "embedded_legacy_terms": ["Nexl"], "rename_status": "documented-alias-do-not-rename" },
+        "paneNexlBrainz": { "canonical_label": "BRAINZ", "embedded_legacy_terms": ["Nexl"], "rename_status": "documented-alias-do-not-rename" }
+      }
+    }
+  },
+  "legacy_function_aliases": {
+    "syncSalezStats": { "file": "assets/js/neogleamz-engine.js", "lines": [1062, 1119], "embedded_legacy_terms": ["Salez"], "rename_status": "documented-alias-do-not-rename", "note": "Referenced by name inside a function-pointer table entry {name:'SALEZ', func: syncSalezStats} (line 1119) — a rename must update both the declaration and this table entry atomically." },
+    "showSalezPane": { "file": "index.html", "lines": [5190], "embedded_legacy_terms": ["Salez"], "rename_status": "documented-alias-do-not-rename", "related_tokens": ["click_showSalezPane_bridge", "click_showSalezPane_analyticz", "click_showSalezPane_commandz"], "note": "Also declared writable in eslint.config.mjs globals." },
+    "showNexlPane": { "file": "index.html", "lines": [5243], "embedded_legacy_terms": ["Nexl"], "rename_status": "documented-alias-do-not-rename", "related_tokens": ["click_showNexlPane_importz", "click_showNexlPane_salez", "click_showNexlPane_brainz"], "note": "Also tracked as an unrelated no-undef ESLint-warning cleanup item at tools/SK8Lytz_Bucket_List.md:267 — that item is a lint-declaration fix, not a rename; do not conflate." }
+  },
+  "legacy_token_aliases": {
+    "click_switchTab_nexl": {
+      "emitter_file": "index.html",
+      "emitter_line": 1931,
+      "handler_file": "assets/js/system-event-delegator.js",
+      "handler_line": 83,
+      "handler_calls": "switchTab('nexuz')",
+      "embedded_legacy_terms": ["nexl"],
+      "rename_status": "documented-alias-do-not-rename",
+      "risk": "FM-5 — no default: case exists in the delegator's switch(action) block, so a partial/non-atomic rename silently disables the NEXUZ tab button with zero console error."
+    }
+  },
+  "rename_forbidden": {
+    "click_advancePrintStatus_*": {
+      "coupling_type": "db_enum",
+      "reason": "Suffix is a literal Supabase print-job status enum value (Queued/Printing/Cleaned/Completed) passed directly as the argument to advancePrintStatus(status).",
+      "evidence": ["assets/js/system-event-delegator.js:584", "assets/js/system-event-delegator.js:587", "assets/js/system-event-delegator.js:590", "assets/js/system-event-delegator.js:593", "index.html:2344-2347", "assets/js/print-module.js:463"]
+    },
+    "pipe-P-*": {
+      "coupling_type": "db_enum",
+      "reason": "DOM id suffix mirrors the same print-job status enum; composed at runtime via 'pipe-P-' + job.status / 'pipe-P-' + s.",
+      "evidence": ["index.html:2344-2347", "assets/js/print-module.js:246", "assets/js/print-module.js:272"],
+      "cross_ref": "dynamic_id_allowlist"
+    },
+    "batchezSopSort_*": {
+      "coupling_type": "persistence",
+      "reason": "localStorage key suffix is the live product name; renaming the key prefix silently orphans every user's saved BATCHEZ SOP sort order with no migration path.",
+      "evidence": ["assets/js/production-module.js:1677", "assets/js/production-module.js:2847"]
+    },
+    "batchezSopExpanded_*": {
+      "coupling_type": "persistence",
+      "reason": "localStorage key suffix is a work-order group id; same silent-data-loss risk as batchezSopSort_*.",
+      "evidence": ["assets/js/production-module.js:1691", "assets/js/production-module.js:2857", "assets/js/production-module.js:2861"]
+    },
+    "layerzSopExpanded_*": {
+      "coupling_type": "persistence",
+      "reason": "Same expand/collapse persistence pattern as batchezSopExpanded_*, scoped to the LAYERZ pane.",
+      "evidence": ["assets/js/system-event-delegator.js:1401", "assets/js/system-event-delegator.js:1405", "assets/js/print-module.js:489"]
+    },
+    "neoSelect_*": {
+      "coupling_type": "persistence",
+      "reason": "D3-cited example — localStorage key suffix is a live <select> element's own DOM id; renaming the select silently wipes that user's saved dropdown value.",
+      "evidence": ["assets/js/neogleamz-engine.js:1310", "assets/js/neogleamz-engine.js:1317"]
+    },
+    "neoResizer_*": {
+      "coupling_type": "persistence",
+      "reason": "D3-cited example — localStorage key suffix is a sidebar/panel DOM id controlling saved drag-resize width/height.",
+      "evidence": ["assets/js/neogleamz-engine.js:1204", "assets/js/neogleamz-engine.js:1228", "assets/js/neogleamz-engine.js:1240", "assets/js/neogleamz-engine.js:1287"]
+    },
+    "neogleamz_*": {
+      "coupling_type": "persistence",
+      "reason": "D8 blanket policy — ALL existing localStorage keys are frozen regardless of prefix; this repo's oldest/most common prefix family (~11 keys observed) is captured as one wildcard entry rather than enumerated individually, consistent with this file's pattern-over-enumeration design. New keys must use sk8lytz_ instead (N5, Phase 2) — does not retroactively apply to these.",
+      "evidence": ["assets/js/label-designer.js:21", "index.html:4335", "assets/js/packerz-module.js:3189", "assets/js/inventory-module.js:168", "assets/js/system-event-delegator.js:519", "assets/js/system-tools-module.js:58", "assets/js/system-tools-module.js:381"]
+    }
+  },
+  "dynamic_id_allowlist": [
+    { "pattern": "paneSalez*", "resolution_type": "runtime-concatenation", "evidence": "index.html:5196 — 'paneSalez' + paneId.charAt(0).toUpperCase() + paneId.slice(1)", "note": "The ONLY hub pane-switcher using true concatenation. showProductionPane (paneProd*), showFulfillzPane (paneFulfillz*), and showNexlPane (paneNexl*) all use static lookup objects (index.html:5211, 5232, 5249) — their ids are literal string values, resolvable by exact match. Do not add paneProd*/paneNexl*/paneFulfillz* here; doing so would over-broaden N1 and mask genuine ghost ids in those functions." },
+    { "pattern": "pipe-P-*", "resolution_type": "runtime-concatenation", "evidence": "assets/js/print-module.js:246,272", "cross_ref": "rename_forbidden.pipe-P-*" },
+    { "pattern": "packerz-card-*", "resolution_type": "runtime-concatenation", "evidence": "assets/js/packerz-module.js:154,340", "note": "Suffix is order.order_id." },
+    { "pattern": "btnCompleteAssembly_*", "resolution_type": "template-literal", "evidence": "assets/js/packerz-module.js:409,434,1264,1290", "note": "Suffix is order_id; used as the target of window.executeWithButtonAction." },
+    { "pattern": "sop-bc-*", "resolution_type": "template-literal", "evidence": "assets/js/packerz-module.js:1595,1636", "note": "Suffix is an incrementing barcodeIdx counter." },
+    { "pattern": "ldProp[A-Z]", "resolution_type": "runtime-concatenation", "evidence": "assets/js/label-designer.js:514", "note": "CORRECTED SCOPE: suffix is exactly one uppercase letter (key.toUpperCase().charAt(0)), not an arbitrary string. Use this narrower regex in Phase 2's N1, not a bare ldProp* wildcard, or it will mask real ghosts under the ldProp prefix." },
+    { "pattern": "neoSelect_*", "resolution_type": "template-literal", "evidence": "assets/js/neogleamz-engine.js:1310,1317", "cross_ref": "rename_forbidden.neoSelect_*" },
+    { "pattern": "neoResizer_*", "resolution_type": "template-literal", "evidence": "assets/js/neogleamz-engine.js:1204,1228,1240,1287", "cross_ref": "rename_forbidden.neoResizer_*" }
+  ],
+  "localstorage_policy": {
+    "existing_keys": "Frozen — rename-forbidden wholesale, no exceptions (D8).",
+    "new_keys": "Must use the sk8lytz_ prefix (D8, enforced by Phase 2's N5 check — new keys only, not retroactive).",
+    "observed_legacy_prefix_families": ["neogleamz_* (~11 keys, see rename_forbidden)", "neoSelect_*", "neoResizer_*", "batchezSopSort_* / batchezSopExpanded_* / layerzSopExpanded_*", "~6 further hub-local state keys carrying no org prefix — already D8-conformant (no prefix was ever required retroactively), not enumerated here"]
+  },
+  "legacy_term_watchlist": [
+    { "term": "Salez", "match_scope": "identifier-safe substring", "false_positive_risk": "low", "note": "No legitimate current identifier or label contains 'Salez'; safe for Phase 2 N4 substring scan." },
+    { "term": "Nexl", "match_scope": "identifier-safe substring", "false_positive_risk": "low" },
+    { "term": "Salz", "match_scope": "identifier-safe substring", "false_positive_risk": "low", "note": "Distinct 4-letter legacy variant from 'Salez' — track separately, do not merge counts." },
+    { "term": "Bridge", "match_scope": "identifier-context only", "false_positive_risk": "medium", "note": "'Bridge' is also a plausible generic English word in comments/prose. N4 must scope matches to identifiers (DOM ids, function/variable names, delegator tokens), not free-text comments, or it will false-positive." },
+    { "term": "Prod", "match_scope": "identifier-boundary only (e.g. paneProd*, ProdBuilder, camelCase 'Prod' segment)", "false_positive_risk": "HIGH", "note": "'Prod' is a substring of legitimate, frequently-used words: 'Production', 'product', 'produce', 'productive'. A bare substring scan will flood N4 with false positives. Must use word/identifier-boundary matching (e.g. a regex anchored on a camelCase/PascalCase segment boundary), not a plain substring test." }
+  ],
+  "known_discrepancies": {
+    "legacy_term_occurrence_estimate": "ADR §1 (docs/architecture/nomenclature-audit-engine.md:16-17) cites 'Total drift: LARGE (150+ hard findings)'. This Phase 1 recon pass found ~28 active-code legacy-term text occurrences (Salez ~12, Nexl ~7, Salz ~4, Bridge ~3, Prod ~2 beyond the pane ids already modeled above). The 150+ figure also folds in the 87 ghost-DOM-lookup and 46 orphan-delegator-token counts (ADR line 16), which are Phase 2 scanner (N1/N2) findings, not raw legacy-term text matches. Sizing-context note for Phase 2/3 planning, not a Phase 1 scope change.",
+    "localstorage_brand_sweep_tension": "The epic's draft Phase 4 plan (docs/plans/nomenclature-audit-engine.md:217) proposes renaming neoSelect_${id} -> sk8lytzSelect_${id} as part of the brand sweep. This directly conflicts with D3/D8's 'existing localStorage keys are frozen, full stop' policy encoded above. Flagged for the Phase 4 planner to resolve explicitly (likely resolution: brand sweep touches comments/paths/script-tag urls only, not localStorage key prefixes) — not blocking for Phase 1, does not change this file."
+  }
+}
