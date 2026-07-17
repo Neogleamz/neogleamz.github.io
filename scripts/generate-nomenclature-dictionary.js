@@ -231,6 +231,22 @@ function buildFooter() {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
+function buildOutput(registry) {
+  const sections = [
+    buildHeaderSection(registry.meta),
+    buildHubPaneDirectory(registry.hubs),
+    buildLegacyAliasLog(registry),
+    buildRenameForbiddenTable(registry.rename_forbidden),
+    buildDynamicIdAllowlistTable(registry.dynamic_id_allowlist),
+    buildLocalStoragePolicy(registry.localstorage_policy),
+    buildLegacyTermWatchlist(registry.legacy_term_watchlist),
+    buildKnownDiscrepancies(registry.known_discrepancies),
+    buildFooter()
+  ];
+
+  return sections.join('\n\n') + '\n';
+}
+
 function generate() {
   let raw;
   try {
@@ -246,19 +262,7 @@ function generate() {
     throw new Error('Invalid JSON in ' + path.relative(ROOT, REGISTRY_PATH) + ': ' + err.message);
   }
 
-  const sections = [
-    buildHeaderSection(registry.meta),
-    buildHubPaneDirectory(registry.hubs),
-    buildLegacyAliasLog(registry),
-    buildRenameForbiddenTable(registry.rename_forbidden),
-    buildDynamicIdAllowlistTable(registry.dynamic_id_allowlist),
-    buildLocalStoragePolicy(registry.localstorage_policy),
-    buildLegacyTermWatchlist(registry.legacy_term_watchlist),
-    buildKnownDiscrepancies(registry.known_discrepancies),
-    buildFooter()
-  ];
-
-  const output = sections.join('\n\n') + '\n';
+  const output = buildOutput(registry);
   fs.writeFileSync(OUTPUT_PATH, output, 'utf8');
   return OUTPUT_PATH;
 }
@@ -273,4 +277,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate };
+module.exports = { generate, buildOutput };

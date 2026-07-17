@@ -1,0 +1,1743 @@
+{
+  "$schema_version": "1.0.0",
+  "captured_at": "2026-07-17T11:56:54.586Z",
+  "total_findings": 358,
+  "by_rule": {
+    "N1_GHOST_ID": 141,
+    "N1_GHOST_ID_PREFIX": 17,
+    "N3_LABEL_DRIFT": 1,
+    "N4_LEGACY_TERM": 85,
+    "N5_NEW_NONCONFORMANT_KEY": 24,
+    "N6_UNUSED_CSS": 90
+  },
+  "fingerprints": [
+    {
+      "fp": "index.html|N1_GHOST_ID|stockz-v-resizer",
+      "file": "index.html",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "stockz-v-resizer",
+      "severity": "CRITICAL",
+      "example_line": 4780
+    },
+    {
+      "fp": "index.html|N1_GHOST_ID|componentsTableWrap",
+      "file": "index.html",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "componentsTableWrap",
+      "severity": "CRITICAL",
+      "example_line": 4782
+    },
+    {
+      "fp": "index.html|N1_GHOST_ID|paneFulfillzSopAdmin",
+      "file": "index.html",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "paneFulfillzSopAdmin",
+      "severity": "CRITICAL",
+      "example_line": 5225
+    },
+    {
+      "fp": "index.html|N1_GHOST_ID|batchProductSelect",
+      "file": "index.html",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "batchProductSelect",
+      "severity": "CRITICAL",
+      "example_line": 6333
+    },
+    {
+      "fp": "assets/js/bom-module.js|N1_GHOST_ID|analytics-tab",
+      "file": "assets/js/bom-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "analytics-tab",
+      "severity": "CRITICAL",
+      "example_line": 90
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|batchProductSelect",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "batchProductSelect",
+      "severity": "CRITICAL",
+      "example_line": 417
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|batchQty",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "batchQty",
+      "severity": "CRITICAL",
+      "example_line": 418
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccMobileBridgeStatus",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccMobileBridgeStatus",
+      "severity": "CRITICAL",
+      "example_line": 1437
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccScannerStatusIndicator",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccScannerStatusIndicator",
+      "severity": "CRITICAL",
+      "example_line": 1438
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccScannerQRContainer",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccScannerQRContainer",
+      "severity": "CRITICAL",
+      "example_line": 1439
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccRemotePreviewScreenContainer",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccRemotePreviewScreenContainer",
+      "severity": "CRITICAL",
+      "example_line": 1440
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|pcRouteBar",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "pcRouteBar",
+      "severity": "CRITICAL",
+      "example_line": 1441
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccMngrItemSelect",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccMngrItemSelect",
+      "severity": "CRITICAL",
+      "example_line": 1455
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccRemotePreviewScreen",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccRemotePreviewScreen",
+      "severity": "CRITICAL",
+      "example_line": 1479
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccMngrQtyInput",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccMngrQtyInput",
+      "severity": "CRITICAL",
+      "example_line": 1615
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|inlineCycleScannerCard",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "inlineCycleScannerCard",
+      "severity": "CRITICAL",
+      "example_line": 1643
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccScannerHeaderTitle",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccScannerHeaderTitle",
+      "severity": "CRITICAL",
+      "example_line": 1647
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccLocalScannerArea",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccLocalScannerArea",
+      "severity": "CRITICAL",
+      "example_line": 1651
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccRemoteScannerArea",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccRemoteScannerArea",
+      "severity": "CRITICAL",
+      "example_line": 1652
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|inlineScannerItemName",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "inlineScannerItemName",
+      "severity": "CRITICAL",
+      "example_line": 1658
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|inlineScannerExpected",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "inlineScannerExpected",
+      "severity": "CRITICAL",
+      "example_line": 1659
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|barcode-reader",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "barcode-reader",
+      "severity": "CRITICAL",
+      "example_line": 1673
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccLocalDeviceSelectContainer",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccLocalDeviceSelectContainer",
+      "severity": "CRITICAL",
+      "example_line": 1685
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccLocalDeviceSelect",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccLocalDeviceSelect",
+      "severity": "CRITICAL",
+      "example_line": 1686
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccLocalIPOverrideContainer",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccLocalIPOverrideContainer",
+      "severity": "CRITICAL",
+      "example_line": 1784
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|pcLocalIPInput_cc",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "pcLocalIPInput_cc",
+      "severity": "CRITICAL",
+      "example_line": 1832
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccScannerQRCodeImg",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccScannerQRCodeImg",
+      "severity": "CRITICAL",
+      "example_line": 1852
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|scanner-success-flash",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "scanner-success-flash",
+      "severity": "CRITICAL",
+      "example_line": 1939
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|pcRoutePhone",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "pcRoutePhone",
+      "severity": "CRITICAL",
+      "example_line": 2020
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|pcRoutePC",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "pcRoutePC",
+      "severity": "CRITICAL",
+      "example_line": 2021
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|pcRouteBoth",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "pcRouteBoth",
+      "severity": "CRITICAL",
+      "example_line": 2022
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccPhoneOnlyPlaceholder",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccPhoneOnlyPlaceholder",
+      "severity": "CRITICAL",
+      "example_line": 2024
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccMngrSearch",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccMngrSearch",
+      "severity": "CRITICAL",
+      "example_line": 2111
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID|ccMngrDropdown",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "ccMngrDropdown",
+      "severity": "CRITICAL",
+      "example_line": 2112
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID_PREFIX|PREFIX:stockzAuditBtn_",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:stockzAuditBtn_",
+      "severity": "MODERATE",
+      "example_line": 2990
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N1_GHOST_ID_PREFIX|PREFIX:stockzAuditTab_",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:stockzAuditTab_",
+      "severity": "MODERATE",
+      "example_line": 3011
+    },
+    {
+      "fp": "assets/js/neogleamz-engine.js|N1_GHOST_ID|packerzLiveSopSplitWrapper",
+      "file": "assets/js/neogleamz-engine.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzLiveSopSplitWrapper",
+      "severity": "CRITICAL",
+      "example_line": 1166
+    },
+    {
+      "fp": "assets/js/neogleamz-engine.js|N1_GHOST_ID|packerzLiveSopLeftPane",
+      "file": "assets/js/neogleamz-engine.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzLiveSopLeftPane",
+      "severity": "CRITICAL",
+      "example_line": 1168
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|btnPackerzSopSignoff",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "btnPackerzSopSignoff",
+      "severity": "CRITICAL",
+      "example_line": 1011
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|packerzLiveInlineRowsWrapper",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzLiveInlineRowsWrapper",
+      "severity": "CRITICAL",
+      "example_line": 1478
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|packerzSopEditorArea",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzSopEditorArea",
+      "severity": "CRITICAL",
+      "example_line": 1478
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|packerzAdminRecipeSelect",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzAdminRecipeSelect",
+      "severity": "CRITICAL",
+      "example_line": 1484
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|packerzAdminQA",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzAdminQA",
+      "severity": "CRITICAL",
+      "example_line": 1547
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|packerzAdminQAPreview",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzAdminQAPreview",
+      "severity": "CRITICAL",
+      "example_line": 1548
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|packerzSopSplitWrapper",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzSopSplitWrapper",
+      "severity": "CRITICAL",
+      "example_line": 1723
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|productionAdminQA",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "productionAdminQA",
+      "severity": "CRITICAL",
+      "example_line": 1764
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|paneFulfillzSopAdmin",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "paneFulfillzSopAdmin",
+      "severity": "CRITICAL",
+      "example_line": 2288
+    },
+    {
+      "fp": "assets/js/packerz-module.js|N1_GHOST_ID|packerzInlineSopLeftPane",
+      "file": "assets/js/packerz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzInlineSopLeftPane",
+      "severity": "CRITICAL",
+      "example_line": 2653
+    },
+    {
+      "fp": "assets/js/print-module.js|N1_GHOST_ID_PREFIX|PREFIX:sect-P-",
+      "file": "assets/js/print-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:sect-P-",
+      "severity": "MODERATE",
+      "example_line": 247
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID|packerzAdminRecipeSelect",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "packerzAdminRecipeSelect",
+      "severity": "CRITICAL",
+      "example_line": 357
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID|productionAdminQA",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "productionAdminQA",
+      "severity": "CRITICAL",
+      "example_line": 462
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID|activeUnitCount",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "activeUnitCount",
+      "severity": "CRITICAL",
+      "example_line": 1202
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID_PREFIX|PREFIX:sect-",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:sect-",
+      "severity": "MODERATE",
+      "example_line": 1479
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID|sopLockBtn",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "sopLockBtn",
+      "severity": "CRITICAL",
+      "example_line": 1488
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID|sopModalWrapper",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "sopModalWrapper",
+      "severity": "CRITICAL",
+      "example_line": 2459
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID|productionAdminQAPreview",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "productionAdminQAPreview",
+      "severity": "CRITICAL",
+      "example_line": 2780
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID_PREFIX|PREFIX:inlineSopQA_",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:inlineSopQA_",
+      "severity": "MODERATE",
+      "example_line": 2902
+    },
+    {
+      "fp": "assets/js/production-module.js|N1_GHOST_ID_PREFIX|PREFIX:inlineSopQAPreview_",
+      "file": "assets/js/production-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:inlineSopQAPreview_",
+      "severity": "MODERATE",
+      "example_line": 2903
+    },
+    {
+      "fp": "assets/js/sales-module.js|N1_GHOST_ID_PREFIX|PREFIX:sim-shipexp-",
+      "file": "assets/js/sales-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:sim-shipexp-",
+      "severity": "MODERATE",
+      "example_line": 1496
+    },
+    {
+      "fp": "assets/js/sales-module.js|N1_GHOST_ID_PREFIX|PREFIX:sim-ghost-",
+      "file": "assets/js/sales-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:sim-ghost-",
+      "severity": "MODERATE",
+      "example_line": 1498
+    },
+    {
+      "fp": "assets/js/sales-module.js|N1_GHOST_ID_PREFIX|PREFIX:sim-net-",
+      "file": "assets/js/sales-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:sim-net-",
+      "severity": "MODERATE",
+      "example_line": 1499
+    },
+    {
+      "fp": "assets/js/socialz-module.js|N1_GHOST_ID|stat-total-skaters",
+      "file": "assets/js/socialz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "stat-total-skaters",
+      "severity": "CRITICAL",
+      "example_line": 407
+    },
+    {
+      "fp": "assets/js/socialz-module.js|N1_GHOST_ID|stat-total-reach",
+      "file": "assets/js/socialz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "stat-total-reach",
+      "severity": "CRITICAL",
+      "example_line": 409
+    },
+    {
+      "fp": "assets/js/socialz-module.js|N1_GHOST_ID|stat-top-style",
+      "file": "assets/js/socialz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "stat-top-style",
+      "severity": "CRITICAL",
+      "example_line": 412
+    },
+    {
+      "fp": "assets/js/socialz-module.js|N1_GHOST_ID|stat-avg-eng",
+      "file": "assets/js/socialz-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "stat-avg-eng",
+      "severity": "CRITICAL",
+      "example_line": 413
+    },
+    {
+      "fp": "assets/js/system-event-delegator.js|N1_GHOST_ID|paneFulfillzSopAdmin",
+      "file": "assets/js/system-event-delegator.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "paneFulfillzSopAdmin",
+      "severity": "CRITICAL",
+      "example_line": 678
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexOrderNum",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexOrderNum",
+      "severity": "CRITICAL",
+      "example_line": 111
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexOrderDate",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexOrderDate",
+      "severity": "CRITICAL",
+      "example_line": 112
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexOrderTotal",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexOrderTotal",
+      "severity": "CRITICAL",
+      "example_line": 113
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexPostage",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexPostage",
+      "severity": "CRITICAL",
+      "example_line": 114
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexMakeup",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexMakeup",
+      "severity": "CRITICAL",
+      "example_line": 115
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexLineItemNum",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexLineItemNum",
+      "severity": "CRITICAL",
+      "example_line": 116
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexItemName",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexItemName",
+      "severity": "CRITICAL",
+      "example_line": 117
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexQuantity",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexQuantity",
+      "severity": "CRITICAL",
+      "example_line": 118
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexUnitPrice",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexUnitPrice",
+      "severity": "CRITICAL",
+      "example_line": 119
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexSpecs",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexSpecs",
+      "severity": "CRITICAL",
+      "example_line": 120
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|liveRegexPlaygroundPayload",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "liveRegexPlaygroundPayload",
+      "severity": "CRITICAL",
+      "example_line": 125
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexPresetSelect",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexPresetSelect",
+      "severity": "CRITICAL",
+      "example_line": 144
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|liveRegexSearchBox",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "liveRegexSearchBox",
+      "severity": "CRITICAL",
+      "example_line": 251
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexParcelNum",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexParcelNum",
+      "severity": "CRITICAL",
+      "example_line": 410
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexActualPaid",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexActualPaid",
+      "severity": "CRITICAL",
+      "example_line": 411
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexChargeableWeight",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexChargeableWeight",
+      "severity": "CRITICAL",
+      "example_line": 412
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexFeeStructure",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexFeeStructure",
+      "severity": "CRITICAL",
+      "example_line": 413
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexDeductionStructure",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexDeductionStructure",
+      "severity": "CRITICAL",
+      "example_line": 414
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexParcelLineItemNum",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexParcelLineItemNum",
+      "severity": "CRITICAL",
+      "example_line": 415
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexParcelItemName",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexParcelItemName",
+      "severity": "CRITICAL",
+      "example_line": 416
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexParcelQuantity",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexParcelQuantity",
+      "severity": "CRITICAL",
+      "example_line": 417
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|regexParcelSpecs",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "regexParcelSpecs",
+      "severity": "CRITICAL",
+      "example_line": 418
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|liveParcelRegexPlaygroundPayload",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "liveParcelRegexPlaygroundPayload",
+      "severity": "CRITICAL",
+      "example_line": 423
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|parcelPresetSelect",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "parcelPresetSelect",
+      "severity": "CRITICAL",
+      "example_line": 442
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|btnDeleteParcelPreset",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "btnDeleteParcelPreset",
+      "severity": "CRITICAL",
+      "example_line": 452
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|btnOverwriteParcelPreset",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "btnOverwriteParcelPreset",
+      "severity": "CRITICAL",
+      "example_line": 453
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|liveParcelRegexSearchBox",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "liveParcelRegexSearchBox",
+      "severity": "CRITICAL",
+      "example_line": 526
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID|backupModal",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "backupModal",
+      "severity": "CRITICAL",
+      "example_line": 1465
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID_PREFIX|PREFIX:inlineContainer_",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:inlineContainer_",
+      "severity": "MODERATE",
+      "example_line": 2856
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID_PREFIX|PREFIX:inlineLeftPane_",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:inlineLeftPane_",
+      "severity": "MODERATE",
+      "example_line": 2857
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID_PREFIX|PREFIX:inlineRightPane_",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:inlineRightPane_",
+      "severity": "MODERATE",
+      "example_line": 2858
+    },
+    {
+      "fp": "assets/js/system-tools-module.js|N1_GHOST_ID_PREFIX|PREFIX:inlinePreviewContainer_",
+      "file": "assets/js/system-tools-module.js",
+      "ruleId": "N1_GHOST_ID_PREFIX",
+      "identifier": "PREFIX:inlinePreviewContainer_",
+      "severity": "MODERATE",
+      "example_line": 2864
+    },
+    {
+      "fp": "assets/js/task-engine.js|N1_GHOST_ID|te-flyout-cycle",
+      "file": "assets/js/task-engine.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "te-flyout-cycle",
+      "severity": "CRITICAL",
+      "example_line": 843
+    },
+    {
+      "fp": "assets/js/task-engine.js|N1_GHOST_ID|newTaskInput",
+      "file": "assets/js/task-engine.js",
+      "ruleId": "N1_GHOST_ID",
+      "identifier": "newTaskInput",
+      "severity": "CRITICAL",
+      "example_line": 2293
+    },
+    {
+      "fp": "index.html|N3_LABEL_DRIFT|SOCIALZ:paneSocialzRoster",
+      "file": "index.html",
+      "ruleId": "N3_LABEL_DRIFT",
+      "identifier": "SOCIALZ:paneSocialzRoster",
+      "severity": "MODERATE",
+      "example_line": 3355
+    },
+    {
+      "fp": "index.html|N4_LEGACY_TERM|Salez",
+      "file": "index.html",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Salez",
+      "severity": "MODERATE",
+      "example_line": 716
+    },
+    {
+      "fp": "index.html|N4_LEGACY_TERM|Bridge",
+      "file": "index.html",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Bridge",
+      "severity": "MODERATE",
+      "example_line": 716
+    },
+    {
+      "fp": "index.html|N4_LEGACY_TERM|Prod",
+      "file": "index.html",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Prod",
+      "severity": "MODERATE",
+      "example_line": 2118
+    },
+    {
+      "fp": "index.html|N4_LEGACY_TERM|Nexl",
+      "file": "index.html",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Nexl",
+      "severity": "MODERATE",
+      "example_line": 2956
+    },
+    {
+      "fp": "index.html|N4_LEGACY_TERM|Salz",
+      "file": "index.html",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Salz",
+      "severity": "MODERATE",
+      "example_line": 2973
+    },
+    {
+      "fp": "assets/js/barcodz-module.js|N4_LEGACY_TERM|Salez",
+      "file": "assets/js/barcodz-module.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Salez",
+      "severity": "MODERATE",
+      "example_line": 615
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N4_LEGACY_TERM|Salez",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Salez",
+      "severity": "MODERATE",
+      "example_line": 411
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N4_LEGACY_TERM|Bridge",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Bridge",
+      "severity": "MODERATE",
+      "example_line": 1437
+    },
+    {
+      "fp": "assets/js/neogleamz-engine.js|N4_LEGACY_TERM|Salez",
+      "file": "assets/js/neogleamz-engine.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Salez",
+      "severity": "MODERATE",
+      "example_line": 1062
+    },
+    {
+      "fp": "assets/js/neogleamz-engine.js|N4_LEGACY_TERM|Salz",
+      "file": "assets/js/neogleamz-engine.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Salz",
+      "severity": "MODERATE",
+      "example_line": 1065
+    },
+    {
+      "fp": "assets/js/system-event-delegator.js|N4_LEGACY_TERM|Salez",
+      "file": "assets/js/system-event-delegator.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Salez",
+      "severity": "MODERATE",
+      "example_line": 602
+    },
+    {
+      "fp": "assets/js/system-event-delegator.js|N4_LEGACY_TERM|Bridge",
+      "file": "assets/js/system-event-delegator.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Bridge",
+      "severity": "MODERATE",
+      "example_line": 602
+    },
+    {
+      "fp": "assets/js/system-event-delegator.js|N4_LEGACY_TERM|Nexl",
+      "file": "assets/js/system-event-delegator.js",
+      "ruleId": "N4_LEGACY_TERM",
+      "identifier": "Nexl",
+      "severity": "MODERATE",
+      "example_line": 749
+    },
+    {
+      "fp": "index.html|N5_NEW_NONCONFORMANT_KEY|theme",
+      "file": "index.html",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "theme",
+      "severity": "CRITICAL",
+      "example_line": 25
+    },
+    {
+      "fp": "index.html|N5_NEW_NONCONFORMANT_KEY|stockzLeftWidth",
+      "file": "index.html",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "stockzLeftWidth",
+      "severity": "CRITICAL",
+      "example_line": 4703
+    },
+    {
+      "fp": "index.html|N5_NEW_NONCONFORMANT_KEY|stockzTopHeight",
+      "file": "index.html",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "stockzTopHeight",
+      "severity": "CRITICAL",
+      "example_line": 4793
+    },
+    {
+      "fp": "index.html|N5_NEW_NONCONFORMANT_KEY|NEOGLEAMZ_VER",
+      "file": "index.html",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "NEOGLEAMZ_VER",
+      "severity": "CRITICAL",
+      "example_line": 5135
+    },
+    {
+      "fp": "index.html|N5_NEW_NONCONFORMANT_KEY|neo_user_email",
+      "file": "index.html",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "neo_user_email",
+      "severity": "CRITICAL",
+      "example_line": 7121
+    },
+    {
+      "fp": "assets/js/barcodz-module.js|N5_NEW_NONCONFORMANT_KEY|barcodzGroupState",
+      "file": "assets/js/barcodz-module.js",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "barcodzGroupState",
+      "severity": "CRITICAL",
+      "example_line": 126
+    },
+    {
+      "fp": "assets/js/bom-module.js|N5_NEW_NONCONFORMANT_KEY|recipeGroupState",
+      "file": "assets/js/bom-module.js",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "recipeGroupState",
+      "severity": "CRITICAL",
+      "example_line": 262
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N5_NEW_NONCONFORMANT_KEY|fgiCategoryState",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "fgiCategoryState",
+      "severity": "CRITICAL",
+      "example_line": 27
+    },
+    {
+      "fp": "assets/js/inventory-module.js|N5_NEW_NONCONFORMANT_KEY|neoSnapshotLeftWidth",
+      "file": "assets/js/inventory-module.js",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "neoSnapshotLeftWidth",
+      "severity": "CRITICAL",
+      "example_line": 872
+    },
+    {
+      "fp": "assets/js/labelz-module.js|N5_NEW_NONCONFORMANT_KEY|labelzGroupState",
+      "file": "assets/js/labelz-module.js",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "labelzGroupState",
+      "severity": "CRITICAL",
+      "example_line": 215
+    },
+    {
+      "fp": "assets/js/neogleamz-engine.js|N5_NEW_NONCONFORMANT_KEY|statImpzSyncs",
+      "file": "assets/js/neogleamz-engine.js",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "statImpzSyncs",
+      "severity": "CRITICAL",
+      "example_line": 1010
+    },
+    {
+      "fp": "assets/js/neogleamz-engine.js|N5_NEW_NONCONFORMANT_KEY|lastBrainSync",
+      "file": "assets/js/neogleamz-engine.js",
+      "ruleId": "N5_NEW_NONCONFORMANT_KEY",
+      "identifier": "lastBrainSync",
+      "severity": "CRITICAL",
+      "example_line": 1096
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|card-stat",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "card-stat",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|back-hub-btn",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "back-hub-btn",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-ghost-emerald",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-ghost-emerald",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-ghost-red",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-ghost-red",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-ghost-purple",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-ghost-purple",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-flat-emerald",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-flat-emerald",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-flat-blue",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-flat-blue",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-flat-red",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-flat-red",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-flat-brand",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-flat-brand",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-flat-purple",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-flat-purple",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-flat-amber",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-flat-amber",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-flat-slate",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-flat-slate",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|inventory-pane",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "inventory-pane",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sub-nav",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sub-nav",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sub-nav-btn",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sub-nav-btn",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|pane-title",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "pane-title",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|no-print",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "no-print",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-purple-muted",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-purple-muted",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-purple-neon",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-purple-neon",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-amber-neon",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-amber-neon",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|btn-slate-neon",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "btn-slate-neon",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|master-card",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "master-card",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|mod-working",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "mod-working",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|mod-success",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "mod-success",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|mod-error",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "mod-error",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sorted-asc",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sorted-asc",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sorted-desc",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sorted-desc",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|highlight-calc",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "highlight-calc",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|negative-stock",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "negative-stock",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|low-stock",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "low-stock",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|margin-good",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "margin-good",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|margin-ok",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "margin-ok",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|margin-bad",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "margin-bad",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|prog-success",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "prog-success",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|prog-error",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "prog-error",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sync-section-header",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sync-section-header",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sync-section-desc",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sync-section-desc",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|ceo-terminal-grid",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "ceo-terminal-grid",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|ceo-control-panel",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "ceo-control-panel",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|span-2",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "span-2",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|span-3",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "span-3",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|login-box",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "login-box",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|exec-header",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "exec-header",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|exec-kpi",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "exec-kpi",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|kpi-box",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "kpi-box",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|badge-queued",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "badge-queued",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|badge-printing",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "badge-printing",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|badge-cleaned",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "badge-cleaned",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|badge-completed",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "badge-completed",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|section-hdr",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "section-hdr",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|transition-all-300",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "transition-all-300",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|glass-panel",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "glass-panel",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|toast-enter",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "toast-enter",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|flex-col",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "flex-col",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|gap-2",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "gap-2",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|gap-4",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "gap-4",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|gap-6",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "gap-6",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|mt-1",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "mt-1",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|mt-4",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "mt-4",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|p-2",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "p-2",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|p-4",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "p-4",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|p-6",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "p-6",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|pt-4",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "pt-4",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|rounded-2xl",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "rounded-2xl",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|w-12",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "w-12",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|h-12",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "h-12",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|object-cover",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "object-cover",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|grid-cols-1",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "grid-cols-1",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|action-toolbar",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "action-toolbar",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|bg-indigo-500",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "bg-indigo-500",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|bg-slate-200",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "bg-slate-200",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|bg-brand",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "bg-brand",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|completed",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "completed",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|manual",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "manual",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sortable-ghost",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sortable-ghost",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sortable-drag",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sortable-drag",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|sortable-dragover",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "sortable-dragover",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|status-completed",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "status-completed",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|status-archived",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "status-archived",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|status-blocked",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "status-blocked",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|status-in-progress",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "status-in-progress",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|status-todo",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "status-todo",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|task-timeline-node",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "task-timeline-node",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|task-checkbox",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "task-checkbox",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|badge-red-neon",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "badge-red-neon",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|socialz-hover-bg-pink",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "socialz-hover-bg-pink",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|socialz-hover-bg-cyan",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "socialz-hover-bg-cyan",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|socialz-hover-bg-red",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "socialz-hover-bg-red",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "index.html|N6_UNUSED_CSS|socialz-hover-bg-blue",
+      "file": "index.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "socialz-hover-bg-blue",
+      "severity": "ADVISORY",
+      "example_line": 1
+    },
+    {
+      "fp": "qa-dashboard.html|N6_UNUSED_CSS|log-success",
+      "file": "qa-dashboard.html",
+      "ruleId": "N6_UNUSED_CSS",
+      "identifier": "log-success",
+      "severity": "ADVISORY",
+      "example_line": 1
+    }
+  ]
+}

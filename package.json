@@ -8,6 +8,8 @@
     "test:watch": "jest --watch",
     "version:bump": "node scripts/bump-system-version.js",
     "generate:nomenclature-dict": "node scripts/generate-nomenclature-dictionary.js",
+    "audit:nomenclature": "node scripts/nomenclature-audit.js",
+    "audit:nomenclature:baseline": "node scripts/nomenclature-audit.js --update-baseline",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
