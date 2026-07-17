@@ -414,7 +414,10 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
 
 async function runProductionBatch() {
     try { 
-        const n = document.getElementById('batchProductSelect').value; const q = parseFloat(document.getElementById('batchQty').value); 
+        const batchProductSelectEl = document.getElementById('batchProductSelect');
+        const batchQtyEl = document.getElementById('batchQty');
+        if (!batchProductSelectEl || !batchQtyEl) { sysLog('runProductionBatch: #batchProductSelect/#batchQty not found in DOM.', true); return; }
+        const n = batchProductSelectEl.value; const q = parseFloat(batchQtyEl.value);
         let batchType = "Production";
         if(document.getElementById('batchTypeSelect')) batchType = document.getElementById('batchTypeSelect').value;
         if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); 
@@ -446,7 +449,9 @@ async function runProductionBatch() {
         if(error) throw new Error(error.message); 
         
         setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); showToast(`✅ Built ${q}x ${n} (${batchType}) and deducted materials.`); 
-        document.getElementById('batchQty').value=1; window.renderInventoryTable(); window.updateCcMngrStock(); setTimeout(()=>setSysProgress(0,'working'),3000); 
+        const batchQtyResetEl = document.getElementById('batchQty');
+        if (batchQtyResetEl) batchQtyResetEl.value = 1;
+        window.renderInventoryTable(); window.updateCcMngrStock(); setTimeout(()=>setSysProgress(0,'working'),3000);
     } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
 }
 
