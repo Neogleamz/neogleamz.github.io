@@ -7,14 +7,28 @@ This is the Canonical Source of Truth. This document must be consulted before ma
 ## 📖 0. Official Nomenclature Dictionary
 
 ### Canonical Nomenclature Dictionary
-| UI Tab Label (Found) | DOM ID (Legacy) | Canonical Name (Mandated) | Associated JS Modules |
+| UI Tab Label (Found) | Tab Content DOM ID | Canonical Name (Mandated) | Associated JS Modules |
 | --- | --- | --- | --- |
-| 📊 STOCKPILEZ | `invhub-tab` | **STOCKPILEZ** | `inventory-module.js`, `bom-module.js` |
-| 🏭 MAKERZ | `prodhub-tab` | **MAKERZ** | `production-module.js`, `barcodz-module.js` |
-| 📦 FULFILLZ | `fulfillzhub-tab` | **FULFILLZ** | `packerz-module.js`, `print-module.js`, `labelz-module.js` |
-| 🛒 REVENUEZ | `salezhub-tab` | **REVENUEZ** | `sales-module.js`, `ceo-module.js` |
-| 👥 SOCIALZ | `socialzhub-tab` | **SOCIALZ** | `socialz-module.js` |
-| ⚡ NEXUZ | `synchub-tab` | **NEXUZ** | `system-tools-module.js`, `task-engine.js` |
+| 📊 STOCKPILEZ | `stockpilez-tab` | **STOCKPILEZ** | `inventory-module.js`, `bom-module.js` |
+| 🏭 MAKERZ | `makerz-tab` | **MAKERZ** | `production-module.js`, `barcodz-module.js` |
+| 📦 FULFILLZ | `fulfillz-tab` | **FULFILLZ** | `packerz-module.js`, `print-module.js`, `labelz-module.js` |
+| 🛒 REVENUEZ | `revenuez-tab` | **REVENUEZ** | `sales-module.js`, `ceo-module.js` |
+| 👥 SOCIALZ | `socialz-tab` | **SOCIALZ** | `socialz-module.js` |
+| ⚡ NEXUZ | `nexuz-tab` | **NEXUZ** | `system-tools-module.js`, `task-engine.js` |
+
+> **Corrected 2026-07-17:** the previous "DOM ID (Legacy)" values in this table
+> (`invhub-tab`, `prodhub-tab`, `fulfillzhub-tab`, `salezhub-tab`, `socialzhub-tab`,
+> `synchub-tab`) did not exist anywhere in the codebase — verified via exhaustive
+> repo-wide grep. Corrected to the real live tab-content ids above. See
+> [docs/plans/feat-nomenclature-registry-1.md](../docs/plans/feat-nomenclature-registry-1.md) §0.1.
+>
+> Pane-level (L2), function-level (L3), and delegator-token legacy aliases, plus the
+> rename-forbidden and dynamic-id-allowlist rules, are maintained in the
+> machine-authoritative [tools/nomenclature-registry.json](nomenclature-registry.json)
+> and its generated human-readable view,
+> [docs/nomenclature_dictionary.md](../docs/nomenclature_dictionary.md). This table
+> intentionally stays scoped to the 6 top-level hub tabs only — do not hand-restate
+> pane/function/token aliases here (ADR decision D1).
 
 ### Architectural Hierarchy Blueprint (IMMUTABLE)
 > **CRITICAL DIRECTIVE:** The following Mermaid topology is the mathematically isolated, canonical map of the entire Neogleamz ecosystem. EVERY SINGLE actionable modal, toggle, or UI flow must be explicitly mapped here. If you are tasked with creating, moving, or deleting a UI element, you MUST update this dictionary.
@@ -559,11 +573,13 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 *The foundational Executive Panes `id="pane..."` that control visibility routing within the main workspace.*
 
 #### 1. NEXUZ (The Command Center)
-- **`paneNexuzBrainz` (A.I. Terminal)**:
+> Pane ids corrected 2026-07-17 — see tools/nomenclature-registry.json for the full
+> legacy-alias record (these ids carry the legacy "Nexl" term by design; see D2).
+- **`paneNexlBrainz` (A.I. Terminal)**:
   - Houses the `#agentTerminal` text UI. Controls strict system commands via `.btn-green` `EXECUTE` and `.btn-blue` `EXPORT BACKUP`.
-- **`paneNexuzImportz` (Data Sync)**:
+- **`paneNexlImportz` (Data Sync)**:
   - Contains distinct `.import-card` blocks. Forces uploaded payload data strings sequentially into the `sandboxDataModal` for deduplication.
-- **`paneNexuzSalez` (Ledger)**:
+- **`paneNexlSalez` (Ledger)**:
   - Strictly Read-Only interface. Renders inbound logic via collapsible classes: `.salez-record` (Standard), `.replacement-row` (Warranty), and `.refund-row` (Ghost Revenue). 
 
 #### 2. STOCKPILEZ (Inventory Logistics)
@@ -860,7 +876,8 @@ To maintain deep topological and execution context for developer agents, the fol
 
 | Document / Asset | Absolute Path | Description / Core Structure | Key Contents |
 | :--- | :--- | :--- | :--- |
-| **Canonical Nomenclature Dictionary** | [nomenclature_dictionary.md](file:///d:/GitHub/neogleamz.github.io/docs/nomenclature_dictionary.md) | Standardizes the mapping between user-facing UI Tab Labels, legacy DOM IDs, Mandated Canonical Names, and their associated JavaScript Modules. | Includes a complete Mermaid-based Architectural Topology Blueprint of the entire application layout, button lists, and modal routes. |
+| **Canonical Nomenclature Dictionary (generated)** | [nomenclature_dictionary.md](file:///d:/GitHub/neogleamz.github.io/docs/nomenclature_dictionary.md) | Human-readable view generated from tools/nomenclature-registry.json — do not hand-edit. Standardizes the mapping between user-facing UI Tab Labels, canonical DOM IDs, legacy-alias notes, rename-forbidden identifiers, and dynamic-id allowlist patterns. | Regenerate via `node scripts/generate-nomenclature-dictionary.js`. For the full Mermaid Architectural Topology Blueprint, see this document's own §0 (single canonical copy). |
+| **Canonical Nomenclature Registry (machine authority)** | [nomenclature-registry.json](file:///d:/GitHub/neogleamz.github.io/tools/nomenclature-registry.json) | The single machine-readable source of truth for hub/pane canonical names, legacy-alias records, rename-forbidden identifiers, and dynamic-id allowlist patterns. | Consumed by the generated dictionary above and by the Phase 2 nomenclature scanner (`scripts/nomenclature-audit.js`, N1–N7 checks). |
 | **Global Architecture Blueprint** | [diagram-1.svg](file:///d:/GitHub/neogleamz.github.io/docs/diagram-1.svg) | A fully compiled high-resolution vector SVG blueprint rendering all Neogleamz hubs, modal triggers, and dynamic visual interactions. | Provides a high-resolution topological visual matching the core Nomenclature dictionary structure. |
 | **Task Engine Evolution** | [task_engine_evolution.md](file:///d:/GitHub/neogleamz.github.io/docs/task_engine_evolution.md) | Documents the Vanilla JS Kanban board and split-pane resizer architectures, contrasting feature sets with linear/agile tools. | Contains a detailed Database ERD mapping `PROJECTZ`, `CYCLEZ`, `SPRINTZ`, `TASKZ`, `TASK_DEPENDENCIES`, and `TASK_TEMPLATES` schemas. |
 | **Shared Archive Explorer Diagram** | [test_shared.md](file:///d:/GitHub/neogleamz.github.io/docs/test_shared.md) | A focused architectural map illustrating shared UI sub-modules. | Visualizes how the BATCHEZ pane (MAKERZ) and PACKERZ pane (FULFILLZ) seamlessly leverage a shared Archive Explorer. |
