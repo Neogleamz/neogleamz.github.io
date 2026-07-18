@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="assets/js/system-version.js?v=v.2026.07.17.0705"></script>
+    <script src="assets/js/system-version.js?v=v.2026.07.17.2127"></script>
     <meta charset="UTF-8">
     <!-- CSP via <meta> tag: report-uri/report-to directives are silently ignored here
          per W3C CSP spec §7.1 — they only function in HTTP response headers.
@@ -19,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js" integrity="sha384-rneZSW/1QE+3/U5/u+/7eRNi/tRc+SzS+yXy36fltr1tDN9EHaVo1Bwz2Z8o8DA4" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" integrity="sha384-c9d8RFSL+u3exBOJ4Yp3HUJXS4znl9f+z66d1y54ig+ea249SpqR+w1wyvXz/lk+" crossorigin="anonymous" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js" integrity="sha384-DgmC6Xe2bSN2WjTDXzWYbUbxyhNP+NNkGDR/g78pCXV7E7rcVTGxVg0uIVCUUcBc" crossorigin="anonymous"></script>
-    <script src="assets/js/system-event-delegator.js?v=v.2026.07.17.0705"></script>
+    <script src="assets/js/system-event-delegator.js?v=v.2026.07.17.2127"></script>
 
     <script>
         const savedTheme = localStorage.getItem("theme") || "light";
@@ -157,8 +157,6 @@
         .hub-card h2 { font-size: 16px; font-weight: 800; margin: 0 0 5px 0; letter-spacing: 1.5px; z-index: 1; text-transform: uppercase; }
         .hub-card p { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0; z-index: 1; opacity: 0.8; max-width: 90%; flex-shrink: 0;}
         
-        .hub-card .card-stat { font-family: 'Righteous', sans-serif; font-weight: 900; font-size: 10px; color: #f97316; background: rgba(249, 115, 22, 0.1); padding: 4px 8px; border-radius: 20px; margin-top: 5px; border: 1px solid rgba(249, 115, 22, 0.15); text-transform: uppercase; }
-        
         .hub-kpi-grid { width: 100%; display: flex; flex-direction: column; gap: 5px; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: auto; }
 
         /* Globally Standardized Button Utility Classes */
@@ -172,7 +170,7 @@
         }
         @media screen and (max-width: 768px) {
             /* 48px Touch Target Enforcement for Skaters */
-            .btn-ghost-base, button, .tab-btn, .sub-nav-btn, .top-action-btn, .back-hub-btn {
+            .btn-ghost-base, button, .tab-btn, .sub-nav-btn, .top-action-btn {
                 min-height: 48px !important;
                 min-width: 48px !important;
                 font-size: 14px !important;
@@ -215,22 +213,12 @@
         }
         
         /* TIER 2: GHOST BUTTONS */
-        .btn-ghost-emerald { color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.25); } .btn-ghost-emerald:hover { background: rgba(16, 185, 129, 0.25); transform: scale(1.02); }
         .btn-ghost-blue { color: #3b82f6; border-color: #3b82f6; background: rgba(59, 130, 246, 0.25); } .btn-ghost-blue:hover { background: rgba(59, 130, 246, 0.25); transform: scale(1.02); }
-        .btn-ghost-red { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.25); } .btn-ghost-red:hover { background: rgba(239, 68, 68, 0.25); transform: scale(1.02); }
         .btn-ghost-brand { color: #f97316; border-color: #f97316; background: rgba(249, 115, 22, 0.25); } .btn-ghost-brand:hover { background: rgba(249, 115, 22, 0.25); transform: scale(1.02); }
-        .btn-ghost-purple { color: #a855f7; border-color: #a855f7; background: rgba(168, 85, 247, 0.25); } .btn-ghost-purple:hover { background: rgba(168, 85, 247, 0.25); transform: scale(1.02); }
         .btn-ghost-amber { color: #f59e0b; border-color: #f59e0b; background: rgba(245, 158, 11, 0.25); } .btn-ghost-amber:hover { background: rgba(245, 158, 11, 0.25); transform: scale(1.02); }
         .btn-ghost-slate { color: #64748b; border-color: #cbd5e1; background: transparent; } .btn-ghost-slate:hover { background: rgba(100, 116, 139, 0.25); color: #334155; transform: scale(1.02); }
 
         /* TIER 3: FLAT BUTTONS */
-        .btn-flat-emerald { color: #10b981; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-emerald:hover { color: #34d399; transform: none; box-shadow: none; }
-        .btn-flat-blue { color: #3b82f6; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-blue:hover { color: #60a5fa; transform: none; box-shadow: none; }
-        .btn-flat-red { color: #ef4444; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-red:hover { color: #f87171; transform: none; box-shadow: none; }
-        .btn-flat-brand { color: #f97316; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-brand:hover { color: #fb923c; transform: none; box-shadow: none; }
-        .btn-flat-purple { color: #a855f7; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-purple:hover { color: #c084fc; transform: none; box-shadow: none; }
-        .btn-flat-amber { color: #f59e0b; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-amber:hover { color: #fbbf24; transform: none; box-shadow: none; }
-        .btn-flat-slate { color: #64748b; border: none; background: transparent; padding: 0; box-shadow: none; font-weight: bold; } .btn-flat-slate:hover { color: #94a3b8; transform: none; box-shadow: none; }
         .hub-kpi-grid {
             display: flex;
             flex-direction: column;
@@ -262,14 +250,11 @@
             display: flex !important; 
             background: var(--bg-body);
         }
-        .inventory-pane { flex-grow: 1; display: none; flex-direction: column; min-height: 0; background: var(--bg-body); }
         .sub-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: var(--bg-glass); padding: 6px; border-radius: 12px; border: 1px solid var(--border-input); align-self: flex-start; flex-wrap: nowrap; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
         .sub-nav::-webkit-scrollbar { display: none; } /* §3 EXCEPTION: intentionally hidden for compact nav strip */
         .sub-nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 800; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
         .sub-nav-btn:hover { background: var(--bg-input); color: var(--text-main); }
         .sub-nav-btn.active { background: #F79320; color: white !important; box-shadow: 0 4px 12px rgba(247, 147, 32, 0.3); }
-        .back-hub-btn { background: rgba(247, 147, 32, 0.1); color: #F79320; border: 1px solid #F79320; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin-right: 15px; transition: 0.2s; }
-        .back-hub-btn:hover { background: #F79320; color: white; }
               /* AUTHORITY LOGIN OVERLAY */
         .login-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999; background: var(--bg-body); display: flex; justify-content: center; align-items: center; font-family: 'Righteous', sans-serif; color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         .login-card { background: var(--bg-glass); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; padding: clamp(28px, 6vw, 60px); max-width: 450px; width: 90%; text-align: center; box-shadow: var(--glass-shadow); color: var(--text-main); transition: all 0.3s ease; }
@@ -395,21 +380,6 @@
         .top-controls { flex: 1 1 0; min-width: max-content; display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
         
         /* ============================================================
-         * .pane-title — DEPRECATED for layout use.
-         * Kept as a standalone style token only.
-         * Use .pane-header-title inside .pane-header-bar instead.
-         * ============================================================ */
-        .pane-title {
-            font-size: clamp(14px, 1.5vw, 22px);
-            font-weight: 900;
-            color: #FF8C00;
-            text-transform: uppercase;
-            letter-spacing: clamp(2px, 0.4vw, 5px);
-            text-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
-            pointer-events: none;
-        }
-
-        /* ============================================================
          * .pane-header-bar — GLOBAL STANDARD for all executive pane headers.
          * ZERO visual identity as a separate bar: transparent bg, no border.
          * Title + buttons sit at the top edge of content with minimal padding.
@@ -499,7 +469,6 @@
             transform: scale(1.4); 
             text-shadow: 0 0 25px rgba(255, 140, 0, 0.9); 
         }
-        .inventory-pane { position: relative; } 
 
         .top-action-btn { 
             background: var(--bg-container); 
@@ -577,7 +546,6 @@
         @media print {
             body > *:not(#printableBarcodeArea) { display: none !important; }
             #printableBarcodeArea { display: block !important; position: relative; width: 100vw; margin: 0; padding: 0; }
-            .no-print { display: none !important; }
             @page { margin: 0; }
         }
         
@@ -593,7 +561,6 @@
         .btn-blue-muted { color: #93c5fd !important; background-color: rgba(59, 130, 246, 0.25) !important; border: 1px solid #93c5fd !important; filter: brightness(0.8); } .btn-blue-muted:hover { filter: brightness(1); }
         .btn-green-muted { color: #6ee7b7 !important; background-color: rgba(16, 185, 129, 0.25) !important; border: 1px solid #6ee7b7 !important; filter: brightness(0.8); } .btn-green-muted:hover { filter: brightness(1); }
         .btn-red-muted { color: #fca5a5 !important; background-color: rgba(239, 68, 68, 0.25) !important; border: 1px solid #fca5a5 !important; filter: brightness(0.8); } .btn-red-muted:hover { filter: brightness(1); }
-        .btn-purple-muted { color: #d8b4fe !important; background-color: rgba(168, 85, 247, 0.25) !important; border: 1px solid #d8b4fe !important; filter: brightness(0.8); } .btn-purple-muted:hover { filter: brightness(1); }
         .btn-amber-muted { color: #fcd34d !important; background-color: rgba(245, 158, 11, 0.25) !important; border: 1px solid #fcd34d !important; filter: brightness(0.8); } .btn-amber-muted:hover { filter: brightness(1); }
         .btn-slate-muted { color: #cbd5e1 !important; background-color: rgba(100, 116, 139, 0.25) !important; border: 1px solid #cbd5e1 !important; filter: brightness(0.8); } .btn-slate-muted:hover { filter: brightness(1); }
 
@@ -612,17 +579,13 @@
         .btn-blue-neon { color: #60a5fa !important; background-color: rgba(96, 165, 250, 0.25) !important; border: 1px solid #60a5fa !important; box-shadow: 0 0 10px rgba(96, 165, 250, 0.25), inset 0 0 5px rgba(96, 165, 250, 0.25) !important; text-shadow: 0 0 5px #60a5fa; font-weight: 900 !important; } .btn-blue-neon:hover { background-color: rgba(96, 165, 250, 0.25) !important; transform: scale(1.03); }
         .btn-green-neon { color: #34d399 !important; background-color: rgba(52, 211, 153, 0.25) !important; border: 1px solid #34d399 !important; box-shadow: 0 0 10px rgba(52, 211, 153, 0.25), inset 0 0 5px rgba(52, 211, 153, 0.25) !important; text-shadow: 0 0 5px #34d399; font-weight: 900 !important; } .btn-green-neon:hover { background-color: rgba(52, 211, 153, 0.25) !important; transform: scale(1.03); }
         .btn-red-neon { color: #ff3333 !important; background-color: rgba(255, 51, 51, 0.25) !important; border: 1px solid #ff3333 !important; box-shadow: 0 0 10px rgba(255, 51, 51, 0.25), inset 0 0 5px rgba(255, 51, 51, 0.25) !important; text-shadow: 0 0 5px #ff3333; font-weight: 900 !important; } .btn-red-neon:hover { background-color: rgba(255, 51, 51, 0.25) !important; transform: scale(1.03); }
-        .btn-purple-neon { color: #c084fc !important; background-color: rgba(192, 132, 252, 0.25) !important; border: 1px solid #c084fc !important; box-shadow: 0 0 10px rgba(192, 132, 252, 0.25), inset 0 0 5px rgba(192, 132, 252, 0.25) !important; text-shadow: 0 0 5px #c084fc; font-weight: 900 !important; } .btn-purple-neon:hover { background-color: rgba(192, 132, 252, 0.25) !important; transform: scale(1.03); }
-        .btn-amber-neon { color: #fbbf24 !important; background-color: rgba(251, 191, 36, 0.25) !important; border: 1px solid #fbbf24 !important; box-shadow: 0 0 10px rgba(251, 191, 36, 0.25), inset 0 0 5px rgba(251, 191, 36, 0.25) !important; text-shadow: 0 0 5px #fbbf24; font-weight: 900 !important; } .btn-amber-neon:hover { background-color: rgba(251, 191, 36, 0.25) !important; transform: scale(1.03); }
-        .btn-slate-neon { color: #94a3b8 !important; background-color: rgba(148, 163, 184, 0.25) !important; border: 1px solid #94a3b8 !important; box-shadow: 0 0 10px rgba(148, 163, 184, 0.25), inset 0 0 5px rgba(148, 163, 184, 0.25) !important; text-shadow: 0 0 5px #94a3b8; font-weight: 900 !important; } .btn-slate-neon:hover { background-color: rgba(148, 163, 184, 0.25) !important; transform: scale(1.03); }
-        
+
         .icon-btn { background: transparent; border: 1px solid var(--border-input); color: var(--text-main); width: 32px !important; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; flex-shrink: 0; box-shadow: none; }
         .icon-btn:hover { background: var(--bg-panel); transform: scale(1.05); box-shadow: none; }
 
         .control-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; align-items: stretch; flex-shrink: 0; }
         .panel-card { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 8px; transition: all 0.3s ease; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
         .panel-card h3 { margin-top: 0; color: var(--text-heading); font-size: 13px; margin-bottom: 5px; border-bottom: 2px solid var(--border-color); padding-bottom: 4px; text-align: center; }
-        .master-card { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; }
         .master-card h3 { color: white; border-bottom: 1px solid rgba(255,255,255,0.2); }
         input[type="file"] { display: block; width: 100%; padding: 6px; background: var(--bg-input); border: 2px dashed var(--border-input); color: var(--text-main); border-radius: 6px; cursor: pointer; transition: all 0.3s; box-sizing: border-box; font-size: 12px; }
         
@@ -962,8 +925,6 @@
         #sysProgress.prog-working::-webkit-progress-value { background-color: #3b82f6; transition: width 0.3s; }
         #sysProgress.prog-success::-webkit-progress-value { background-color: rgba(255,255,255,0.5); transition: width 0.3s; }
         #sysProgress.prog-error::-webkit-progress-value { background-color: #ffffff; transition: width 0.3s; }
-        .sync-section-header { margin: 25px 0 5px 0; font-size: 11px; font-weight: 900; color: #FF8C00; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
-        .sync-section-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-style: italic; grid-column: 1 / -1; margin-top: -2px; line-height: 1.4; }
 
         /* ========================================= */
         /* MOBILE / TABLET VIEWPORT STYLES (Max Width: 1024px) */
@@ -1045,8 +1006,6 @@
             .analytics-grid { grid-template-columns: 1fr 1fr; }
             
             /* CEO Terminal specific overrides */
-            .ceo-terminal-grid { grid-template-columns: 1fr !important; }
-            .ceo-control-panel { height: auto; overflow: visible; display: flex !important; }
             .ceo-charts-row { grid-template-columns: 1fr !important; display: flex !important; flex-direction: column; }
             .ceo-chart-box { grid-column: span 1 !important; width: 100% !important; min-height: 250px !important; }
             
@@ -1055,8 +1014,6 @@
             .packerz-kanban-col, #packerzLiveSopLeftPane { width: 100% !important; min-width: 100% !important; max-width: 100% !important; flex: 0 0 auto !important; height: clamp(400px, 60vh, 800px) !important; }
             #packerzLiveSopRightPane { width: 100% !important; min-width: 100% !important; max-width: 100% !important; flex: 1 1 auto !important; min-height: 50vh !important; }
             
-            .span-2 { grid-column: span 1 !important; }
-            .span-3 { grid-column: span 1 !important; }
             .ceo-kpi-row { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
             
             .kitting-board { grid-template-columns: 1fr; }
@@ -1065,10 +1022,6 @@
             
             [id$="Modal"] .container { width: 95vw !important; max-width: 95vw !important; max-height: 90vh !important; overflow-y: auto; border-radius: 8px; padding: 15px; }
             .massive-container { width: 100vw; height: 100vh; max-width: none; border-radius: 0; padding: 10px; overflow-y: auto; }
-            .login-box { padding: 20px; width: 90%; }
-            .exec-header { flex-direction: column; gap: 10px; margin-bottom: 15px; }
-            .exec-kpi { flex-direction: column; gap: 10px; width: 100%; }
-            .kpi-box { width: 100%; justify-content: space-between; }
             
 
             .top-action-btn { flex: 0 0 auto !important; justify-content: center; padding: 8px 12px !important; font-size: 12px !important; width: auto !important; min-height: 40px !important; height: 40px !important; }
@@ -1095,10 +1048,6 @@
             .sop-controls-container { min-width: 0; }
             
             /* 3D PRINT QUEUE STYLES */
-            .badge-queued { background: #64748b; color: white; }
-            .badge-printing { background: #3b82f6; color: white; animation: pulseBlue 2s infinite; }
-            .badge-cleaned { background: #f59e0b; color: white; }
-            .badge-completed { background: #10b981; color: white; }
             @keyframes pulseBlue { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
             .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
         }
@@ -1137,7 +1086,6 @@
             .bom-sidebar { max-height: clamp(250px, 45vh, 400px) !important; }
             .pipe-step { flex: 1 1 100% !important; }
             .title-block h1 { font-size: 16px !important; }
-            .pane-title { font-size: 14px !important; letter-spacing: 2px !important; }
             .top-controls { flex-wrap: wrap !important; width: auto !important; }
             .sub-nav-btn { padding: 6px 10px !important; font-size: 11px !important; }
         }
@@ -1210,16 +1158,6 @@
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
         }
 
-        /* Section header — consistent orange uppercase label */
-        .section-hdr {
-            font-size: 11px; font-weight: 900; color: #FF8C00;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px; margin: 20px 0 8px 0;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .section-hdr:first-child { margin-top: 0; }
-
         /* Empty / placeholder state */
         .empty-state {
             color: var(--text-muted); text-align: center;
@@ -1249,10 +1187,6 @@
             text-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
             transform: translateY(-2px) !important;
         }
-        .pane-title {
-            color: #2dd4bf !important;
-            text-shadow: 0 0 15px rgba(45, 212, 191, 0.3) !important;
-        }
         .nav-zone.left { background: linear-gradient(to right, rgba(45, 212, 191, 0.15) 0%, transparent 100%) !important; }
         .nav-zone.right { background: linear-gradient(to left, rgba(45, 212, 191, 0.15) 0%, transparent 100%) !important; }
         .nav-zone:hover { background: linear-gradient(to var(--dir, right), rgba(45, 212, 191, 0.35) 0%, transparent 100%) !important; }
@@ -1277,19 +1211,6 @@
         .dark ::-webkit-scrollbar-thumb { background: #2dd4bf; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #14b8a6; }
 
-        /* Smooth Transitions */
-        .transition-all-300 { transition: all 0.3s ease-in-out; }
-        
-        /* Glassmorphism for Modals */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-        }
-        .dark .glass-panel {
-            background: rgba(30, 41, 59, 0.95);
-        }
-
         /* Toast Animation */
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
@@ -1304,15 +1225,8 @@
         }
     /* SOCIALZ Native CSS Shim (Replaces Tailwind) */
     #socialz-tab select, #socialz-tab input { background-color: var(--bg-surface-light, #1e293b); color: var(--text-color, white); padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; }
-    :where(#socialz-tab, #skater-modal, #analytics-modal) .glass-panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--glass-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    :where(#socialz-tab, #skater-modal, #analytics-modal) .glass-panel:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
     :where(#socialz-tab, #skater-modal, #analytics-modal) button { background: transparent; border: none; cursor: pointer; padding: 0; outline: none; }
-    #socialz-tab .glass-panel { padding: 16px; display:flex; flex-direction:column; gap:8px; }
     :where(#socialz-tab, #skater-modal, #analytics-modal) .flex { display: flex; }
-    :where(#socialz-tab, #skater-modal, #analytics-modal) .flex-col { flex-direction: column; }
-    #socialz-tab .gap-2 { gap: 8px; }
-    #socialz-tab .gap-4 { gap: 16px; }
-    #socialz-tab .gap-6 { gap: 24px; }
     :where(#socialz-tab, #skater-modal, #analytics-modal) .items-center { align-items: center; }
     #socialz-tab .justify-between { justify-content: space-between; }
     #socialz-tab .justify-center { justify-content: center; }
@@ -1321,24 +1235,13 @@
     #socialz-tab .font-bold { font-weight: bold; }
     #socialz-tab .mb-2 { margin-bottom: 8px; }
     #socialz-tab .mb-4 { margin-bottom: 16px; }
-    #socialz-tab .mt-1 { margin-top: 4px; }
-    #socialz-tab .mt-4 { margin-top: 16px; }
-    #socialz-tab .p-2 { padding: 8px; }
-    #socialz-tab .p-4 { padding: 16px; }
-    #socialz-tab .p-6 { padding: 24px; }
-    #socialz-tab .pt-4 { padding-top: 16px; }
     #socialz-tab .border-t { border-top: 1px solid var(--border-color); }
     #socialz-tab .rounded-full { border-radius: 999px; }
     #socialz-tab .rounded-xl { border-radius: 12px; }
-    #socialz-tab .rounded-2xl { border-radius: 16px; }
-    #socialz-tab .w-12 { width: 48px; }
-    #socialz-tab .h-12 { height: 48px; }
-    #socialz-tab .object-cover { object-fit: cover; }
     #socialz-tab .bg-slate-800, #socialz-tab .dark\:bg-slate-800, #socialz-tab .dark\:bg-slate-900 { background-color: var(--bg-surface-light, #1e293b); }
     #socialz-tab .hidden { display: none !important; }
     
     :where(#socialz-tab, #skater-modal, #analytics-modal) .grid { display: grid; }
-    :where(#socialz-tab, #skater-modal, #analytics-modal) .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
     :where(#socialz-tab, #skater-modal, #analytics-modal) .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     @media (min-width: 768px) { 
         #socialz-tab > .executive-pane > .bom-layout > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
@@ -1359,15 +1262,10 @@
     }
     
     /* TOOLBAR NATIVE SHIM */
-    #socialz-tab .action-toolbar { display: flex; flex-direction: row; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; justify-content: flex-start; }
     #socialz-tab .action-toolbar button { width: auto !important; flex: 0 0 auto !important; padding: 8px 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s, background 0.2s; white-space: nowrap; }
     #socialz-tab .action-toolbar button:hover { transform: translateY(-2px); }
-    #socialz-tab .action-toolbar .bg-indigo-500 { background: #6366f1; color: white; }
-    #socialz-tab .action-toolbar .bg-indigo-500:hover { background: #4f46e5; }
-    #socialz-tab .action-toolbar .bg-slate-200, #socialz-tab .action-toolbar .dark\:bg-slate-800 { background: #1e293b; color: white; border: 1px solid #334155; box-shadow: none; }
-    #socialz-tab .action-toolbar .bg-slate-200:hover, #socialz-tab .action-toolbar .dark\:bg-slate-800:hover { background: #334155; }
-    #socialz-tab .action-toolbar .bg-brand { background: #f97316; color: white; }
-    #socialz-tab .action-toolbar .bg-brand:hover { background: #ea580c; }
+    #socialz-tab .action-toolbar .dark\:bg-slate-800 { background: #1e293b; color: white; border: 1px solid #334155; box-shadow: none; }
+    #socialz-tab .action-toolbar .dark\:bg-slate-800:hover { background: #334155; }
     
     /* MODAL CSS SHIM (MODIFIED TITLE: PURGED TAILWIND) ================================ */
     .socialz-grid-layout { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
@@ -1375,9 +1273,6 @@
     #skater-modal textarea, #skater-modal input[type='text'], #skater-modal select { width: 100%; box-sizing: border-box; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; color: var(--text-color); font-size: 14px; outline: none; margin-top: 4px; }
     #skater-modal textarea:focus, #skater-modal input:focus, #skater-modal select:focus { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(249,115,22,0.2); }
     #skater-modal label { display: flex; align-items: center; }
-
-    /* Smooth Transitions */
-    .transition-all-300 { transition: all 0.3s ease-in-out; }
 
     /* Toast Animation */
     @keyframes slideIn {
@@ -1651,13 +1546,6 @@
         width: calc(100% - 12px);
         box-sizing: border-box;
     }
-    /* Provide a subtle drop zone indicator for nested subtasks when dragging over them */
-    .te-sortable-subtask-list.sortable-dragover,
-    .te-sortable-cycle-list.sortable-dragover {
-        background-color: rgba(255,255,255,0.02);
-        border: 1px dashed rgba(255,255,255,0.2);
-        border-radius: 8px;
-    }
     .status-pill {
         display: inline-flex;
         align-items: center;
@@ -1673,7 +1561,6 @@
     }
     .status-completed { background: rgba(16, 185, 129, 0.8); }
     .status-archived { background: rgba(139, 92, 246, 0.8); }
-    .status-blocked { background: rgba(239, 68, 68, 0.8); }
     .status-in-progress { background: rgba(59, 130, 246, 0.8); }
     .status-todo { background: rgba(156, 163, 175, 0.5); }
     
@@ -1685,15 +1572,6 @@
         flex-direction: column;
         gap: 15px;
         position: relative;
-    }
-    .task-timeline-node {
-        position: absolute;
-        left: -20px;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--text-muted);
-        top: 5px;
     }
     #neoCommandPalette {
         position: fixed;
@@ -1748,20 +1626,6 @@
         background: rgba(255,255,255,0.05);
         color: white;
     }
-    .task-checkbox {
-        width: 18px;
-        height: 18px;
-        border-radius: 4px;
-        border: 2px solid var(--text-muted);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-    .task-row:hover .task-checkbox {
-        border-color: #ef4444;
-    }
-    
     /* Task Engine specific sleek dark checkbox */
     .te-task-checkbox {
         appearance: none;
@@ -1788,19 +1652,6 @@
         background-repeat: no-repeat;
         background-position: center;
         background-size: 10px 10px;
-    }
-    .badge-red-neon {
-        background: #ef4444;
-        color: white;
-        font-size: 9px;
-        font-weight: 900;
-        padding: 2px 6px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        animation: pulseNeon 2s infinite;
     }
     @keyframes pulseNeon {
         0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.5); }
@@ -6397,21 +6248,21 @@
         }
     };
 </script>
-<script src="assets/js/neogleamz-engine.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/kpi-reports-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/system-realtime-sync.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/system-tools-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/bom-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/inventory-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/packerz-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/production-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/sales-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/analytics-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/ceo-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/task-engine.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/print-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/scraper-module.js?v=v.2026.07.17.0705"></script>
-<script src="assets/js/socialz-module.js?v=v.2026.07.17.0705"></script>
+<script src="assets/js/neogleamz-engine.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/kpi-reports-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/system-realtime-sync.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/system-tools-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/bom-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/inventory-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/packerz-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/production-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/sales-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/analytics-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/ceo-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/task-engine.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/print-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/scraper-module.js?v=v.2026.07.17.2127"></script>
+<script src="assets/js/socialz-module.js?v=v.2026.07.17.2127"></script>
 
 <!-- TIPZ BOARD MODAL -->
 <div id="tipzModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -7202,9 +7053,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.4.1/bwip-js-min.js" integrity="sha384-jr32hDP/XSI4JoIOOXRJC0ZAmy7CSfupA+IfOKNZCfZYGBH+TdgyfEgtOV0pFewk" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/jspdf@4.2.1/dist/jspdf.umd.min.js" integrity="sha384-qovJwSBbRDPP5cEjCp8S0UP66wrvnjaa60XMOGzTNanrThcrGfXfnZkvgY8N1KT3" crossorigin="anonymous"></script>
     <!-- Fulfillz Subsystems -->
-    <script src="assets/js/barcodz-module.js?v=v.2026.07.17.0705"></script>
+    <script src="assets/js/barcodz-module.js?v=v.2026.07.17.2127"></script>
     <script src="assets/js/label-designer.js?v=1"></script>
-    <script src="assets/js/labelz-module.js?v=v.2026.07.17.0705"></script>
+    <script src="assets/js/labelz-module.js?v=v.2026.07.17.2127"></script>
     <!-- Webhooks Manager Modal -->
     <div id="webhooksModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:10010; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
         <div class="container" style="width:100%; max-width:1000px; display:flex; flex-direction:column; background:var(--bg-container); padding:20px; max-height:85vh; border-radius:8px;">
