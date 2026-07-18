@@ -140,6 +140,66 @@
       "coupling_type": "persistence",
       "reason": "D8 blanket policy — ALL existing localStorage keys are frozen regardless of prefix; this repo's oldest/most common prefix family (~11 keys observed) is captured as one wildcard entry rather than enumerated individually, consistent with this file's pattern-over-enumeration design. New keys must use sk8lytz_ instead (N5, Phase 2) — does not retroactively apply to these.",
       "evidence": ["assets/js/label-designer.js:21", "index.html:4335", "assets/js/packerz-module.js:3189", "assets/js/inventory-module.js:168", "assets/js/system-event-delegator.js:519", "assets/js/system-tools-module.js:58", "assets/js/system-tools-module.js:381"]
+    },
+    "theme": {
+      "coupling_type": "persistence",
+      "reason": "Existing user-facing theme preference (light/dark), predates the sk8lytz_ prefix policy by several months. Renaming would silently reset every returning user's saved theme to default with no migration path.",
+      "evidence": ["index.html:25", "index.html:4261", "index.html:4531"]
+    },
+    "stockzLeftWidth": {
+      "coupling_type": "persistence",
+      "reason": "Persists the user's drag-resized left-table flex-basis width in the STOCKPILEZ split-pane view. Renaming would silently collapse every returning user's customized column split back to the unstyled default on next load.",
+      "evidence": ["index.html:4554", "index.html:4599"]
+    },
+    "stockzTopHeight": {
+      "coupling_type": "persistence",
+      "reason": "Persists the user's drag-resized top-table height (px) in the STOCKPILEZ split-pane view, the vertical-resize counterpart to stockzLeftWidth. Renaming would silently reset every returning user's saved pane height with no migration path.",
+      "evidence": ["index.html:4644", "index.html:4683"]
+    },
+    "NEOGLEAMZ_VER": {
+      "coupling_type": "persistence",
+      "reason": "Stores the app version string from the user's last session, compared against the current build to fire the one-time 'System Updated: X ➝ Y' boot log. Renaming would silently orphan the old key so every existing user's browser re-reports as a fresh install, permanently losing the version-change detection for that session.",
+      "evidence": ["index.html:4986", "index.html:4991"]
+    },
+    "neo_user_email": {
+      "coupling_type": "persistence",
+      "reason": "Cached fallback email address used to attribute anonymous tip/feedback submissions to 'tipz' when the login form field is empty. Renaming would silently drop every returning user's cached identity back to the generic 'unknown_user' fallback.",
+      "evidence": ["index.html:6972"]
+    },
+    "barcodzGroupState": {
+      "coupling_type": "persistence",
+      "reason": "JSON blob persisting which FULFILLZ → BARCODZ grid category groups (Retail Product / Sub-Assembly / Custom Labelz / 3D Print / Raw Material) a user left expanded vs. collapsed. Renaming would silently revert every returning user's saved expand/collapse layout to the all-collapsed default.",
+      "evidence": ["assets/js/barcodz-module.js:126", "assets/js/barcodz-module.js:184"]
+    },
+    "recipeGroupState": {
+      "coupling_type": "persistence",
+      "reason": "JSON blob persisting which MAKERZ → RECIPEZ builder category groups (cat-retail/cat-sub/cat-print/cat-raw) a user left expanded vs. collapsed — same expand/collapse persistence pattern as barcodzGroupState/fgiCategoryState/labelzGroupState, scoped to the recipe builder pane. Renaming would silently revert every returning user's saved layout to the hardcoded defaults.",
+      "evidence": ["assets/js/bom-module.js:262", "assets/js/bom-module.js:283"]
+    },
+    "fgiCategoryState": {
+      "coupling_type": "persistence",
+      "reason": "JSON blob persisting which STOCKPILEZ finished-goods-inventory (FGI) table category groups a user left expanded vs. collapsed — same expand/collapse persistence pattern as barcodzGroupState/recipeGroupState/labelzGroupState, scoped to the FGI table. Renaming would silently revert every returning user's saved layout to the all-expanded default.",
+      "evidence": ["assets/js/inventory-module.js:27", "assets/js/inventory-module.js:31"]
+    },
+    "neoSnapshotLeftWidth": {
+      "coupling_type": "persistence",
+      "reason": "Persists the user's drag-resized left-pane width (px) in the Snapshot Manager modal's list view — a distinct resizer/modal from stockzLeftWidth. Renaming would silently reset every returning user's saved modal layout to default width.",
+      "evidence": ["assets/js/inventory-module.js:872", "assets/js/inventory-module.js:910"]
+    },
+    "labelzGroupState": {
+      "coupling_type": "persistence",
+      "reason": "JSON blob persisting which FULFILLZ → LABELZ grid category groups a user left expanded vs. collapsed — same expand/collapse persistence pattern as barcodzGroupState/recipeGroupState/fgiCategoryState, scoped to the labelz grid. Renaming would silently revert every returning user's saved layout to the all-collapsed default.",
+      "evidence": ["assets/js/labelz-module.js:215", "assets/js/labelz-module.js:306"]
+    },
+    "statImpzSyncs": {
+      "coupling_type": "persistence",
+      "reason": "Persisted sync counter displayed as the 'Vault Ingestionz' KPI stat on the NEXUZ → IMPORTZ pane. The value already lives in returning users' browsers from prior sessions; renaming would silently zero out their displayed sync count with no migration path.",
+      "evidence": ["assets/js/neogleamz-engine.js:1010"]
+    },
+    "lastBrainSync": {
+      "coupling_type": "persistence",
+      "reason": "Persisted epoch-ms timestamp used to compute the 'Xm ago' last-sync display on the NEXUZ → BRAINZ pane. Renaming would silently reset every returning user's display back to 'NEVER' even though a real prior sync exists.",
+      "evidence": ["assets/js/neogleamz-engine.js:1096"]
     }
   },
   "dynamic_id_allowlist": [
@@ -155,7 +215,7 @@
   "localstorage_policy": {
     "existing_keys": "Frozen — rename-forbidden wholesale, no exceptions (D8).",
     "new_keys": "Must use the sk8lytz_ prefix (D8, enforced by Phase 2's N5 check — new keys only, not retroactive).",
-    "observed_legacy_prefix_families": ["neogleamz_* (~11 keys, see rename_forbidden)", "neoSelect_*", "neoResizer_*", "batchezSopSort_* / batchezSopExpanded_* / layerzSopExpanded_*", "~6 further hub-local state keys carrying no org prefix — already D8-conformant (no prefix was ever required retroactively), not enumerated here"]
+    "observed_legacy_prefix_families": ["neogleamz_* (~11 keys, see rename_forbidden)", "neoSelect_*", "neoResizer_*", "batchezSopSort_* / batchezSopExpanded_* / layerzSopExpanded_*", "theme, stockzLeftWidth, stockzTopHeight, NEOGLEAMZ_VER, neo_user_email, barcodzGroupState, recipeGroupState, fgiCategoryState, neoSnapshotLeftWidth, labelzGroupState, statImpzSyncs, lastBrainSync — 12 further hub-local state keys carrying no org prefix, already D8-conformant (no prefix was ever required retroactively), individually enumerated in rename_forbidden"]
   },
   "legacy_term_watchlist": [
     { "term": "Salez", "match_scope": "identifier-safe substring", "false_positive_risk": "low", "note": "No legitimate current identifier or label contains 'Salez'; safe for Phase 2 N4 substring scan." },
