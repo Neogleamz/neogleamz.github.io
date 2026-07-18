@@ -256,7 +256,6 @@ export default [
         "savePrintOrderPrefs": "writable",
         "saveWOOrderPrefs": "writable",
         "searchLabelzCatalog": "writable",
-        "selectCcMngrItem": "writable",
         "setMasterStatus": "writable",
         "setNewTipPriority": "writable",
         "setSysProgress": "writable",

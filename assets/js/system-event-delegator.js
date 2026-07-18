@@ -261,9 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_openCycleCountManager':
                     window.openCycleCountManager();
                     break;
-                case 'click_updateLocalIPQRCode_cc':
-                    if (typeof window.click_updateLocalIPQRCode_cc === 'function') window.click_updateLocalIPQRCode_cc();
-                    break;
                 case 'click_toggleStockzAuditScanner':
                     if (window.toggleStockzAuditScanner) window.toggleStockzAuditScanner();
                     break;
@@ -1208,27 +1205,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_window_closeCycleCountManager':
                     window.closeCycleCountManager();
                     break;
-                case 'click_window_startCycleCount':
-                    window.startCycleCount();
-                    break;
-                case 'click_startLocalCycleCount':
-                    if (typeof window.startLocalCycleCount === 'function') window.startLocalCycleCount();
-                    break;
-                case 'click_startRemoteCycleCount':
-                    if (typeof window.startRemoteCycleCount === 'function') window.startRemoteCycleCount();
-                    break;
-                case 'click_setCCRoutePhone':
-                    if (typeof window.click_setCCRoutePhone === 'function') window.click_setCCRoutePhone();
-                    break;
-                case 'click_setCCRoutePC':
-                    if (typeof window.click_setCCRoutePC === 'function') window.click_setCCRoutePC();
-                    break;
-                case 'click_setCCRouteBoth':
-                    if (typeof window.click_setCCRouteBoth === 'function') window.click_setCCRouteBoth();
-                    break;
-                case 'click_window_filterCcMngrItems':
-                    window.filterCcMngrItems();
-                    break;
                 case 'click_window_saveManualCycleCount':
                     window.executeWithButtonAction(el, 'SAVING...', '✅ SAVED', async () => { if(typeof window.saveManualCycleCount === 'function') await window.saveManualCycleCount(); });
                     break;
@@ -1691,9 +1667,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'keyup_filterUnifiedBuilderList':
                     filterUnifiedBuilderList();
                     break;
-                case 'keyup_window_filterCcMngrItems':
-                    window.filterCcMngrItems();
-                    break;
                 case 'keyup_window_filterStockzAuditItems':
                     if (window.filterStockzAuditItems) window.filterStockzAuditItems();
                     break;
@@ -1879,9 +1852,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'change_handleSOPWebcamDeviceChange':
                     if (typeof window.change_handleSOPWebcamDeviceChange === 'function') window.change_handleSOPWebcamDeviceChange(el);
-                    break;
-                case 'change_handleCCLocalDeviceChange':
-                    if (typeof window.change_handleCCLocalDeviceChange === 'function') window.change_handleCCLocalDeviceChange(event);
                     break;
                 case 'change_handleStockzAuditDeviceChange':
                     if (typeof window.change_handleStockzAuditDeviceChange === 'function') window.change_handleStockzAuditDeviceChange(event);
