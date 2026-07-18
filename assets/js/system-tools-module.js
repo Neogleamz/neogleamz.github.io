@@ -2841,50 +2841,6 @@ window.stopUnifiedSopResize = function() {
     }
 };
 
-window.initInlineResize = function(e, grpId) {
-    if(e) e.preventDefault();
-    window.isInlineResizing = true;
-    window.currentInlineResizeGrp = grpId;
-    document.body.style.cursor = 'col-resize';
-    document.addEventListener('mousemove', window.doInlineResize);
-    document.addEventListener('mouseup', window.stopInlineResize);
-};
-
-window.doInlineResize = function(e) {
-    if(!window.isInlineResizing) return;
-    let grpId = window.currentInlineResizeGrp;
-    const wrapper = document.getElementById('inlineContainer_' + grpId);
-    const leftPane = document.getElementById('inlineLeftPane_' + grpId);
-    const rightPane = document.getElementById('inlineRightPane_' + grpId);
-    if(!wrapper || !leftPane) return;
-    
-    const rect = wrapper.getBoundingClientRect();
-    let newWidth = e.clientX - rect.left - 15;
-    
-    const previewCol = document.getElementById('inlinePreviewContainer_' + grpId);
-    let isPreviewOpen = previewCol && previewCol.style.display !== 'none';
-
-    let minBound = isPreviewOpen ? 640 : 320;
-    let maxBound = rect.width - 350;
-
-    if(newWidth < minBound) newWidth = minBound;
-    if(newWidth > maxBound) newWidth = maxBound;
-
-    leftPane.style.flex = '0 0 ' + newWidth + 'px';
-    leftPane.style.width = newWidth + 'px';
-    if(rightPane) rightPane.style.flex = '1 1 0';
-};
-
-window.stopInlineResize = function() {
-    if(window.isInlineResizing) {
-        window.isInlineResizing = false;
-        window.currentInlineResizeGrp = null;
-        document.body.style.cursor = 'default';
-        document.removeEventListener('mousemove', window.doInlineResize);
-        document.removeEventListener('mouseup', window.stopInlineResize);
-    }
-};
-
 
 // --- 14. LOCAL ENGINE & SANDBOX AUTOMATION ---
 window.pingLocalEngine = async function() {
