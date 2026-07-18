@@ -1491,13 +1491,7 @@ function recomputeSimulator() {
         let i = row.uiIdx;
         
         // Update DOM live
-        let elCapture = document.getElementById(`sim-capture-${i}`);
-        let elFee = document.getElementById(`sim-fee-${i}`);
-        let elShipExp = document.getElementById(`sim-shipexp-${i}`);
-        let elCogs = document.getElementById(`sim-cogs-${i}`);
-        let elGhost = document.getElementById(`sim-ghost-${i}`);
-        let elNet = document.getElementById(`sim-net-${i}`);
-        
+
         const verifiedBadge = `<span style="background:#10b981; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:8px;">VERIFIED</span>`;
 
         // Build Console Output (FORENSIC TRUTH)
