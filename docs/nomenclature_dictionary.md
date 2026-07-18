@@ -69,6 +69,10 @@
 | `ldProp[A-Z]` | runtime-concatenation | CORRECTED SCOPE: suffix is exactly one uppercase letter (key.toUpperCase().charAt(0)), not an arbitrary string. Use this narrower regex in Phase 2's N1, not a bare ldProp* wildcard, or it will mask real ghosts under the ldProp prefix. |
 | `neoSelect_*` | template-literal | Evidence: assets/js/neogleamz-engine.js:1310,1317 — see rename_forbidden.neoSelect_* |
 | `neoResizer_*` | template-literal | Evidence: assets/js/neogleamz-engine.js:1204,1228,1240,1287 — see rename_forbidden.neoResizer_* |
+| `stockzAuditBtn_*` | template-literal | 3 static tab-button ids (stockzAuditBtn_audit, stockzAuditBtn_planning, stockzAuditBtn_history); read via `stockzAuditBtn_${t}` in assets/js/inventory-module.js:2990,3014,3027. |
+| `stockzAuditTab_*` | template-literal | 3 static tab-pane ids (stockzAuditTab_audit, stockzAuditTab_planning, stockzAuditTab_history); read via `stockzAuditTab_${t}` in assets/js/inventory-module.js:3011,3022. |
+| `sect-P-*` | runtime-concatenation | Print-job-status pipeline section-container counterpart to pipe-P-* — same status enum (Queued/Printing/Cleaned/Completed), different DOM role: pipe-P-* is the tab pill, sect-P-* is the content section. Composed at runtime via 'sect-P-' + s / 'sect-P-' + job.status, NOT a template literal — corrected from the initial task assumption after verifying assets/js/print-module.js:247,273. |
+| `sect-*` | runtime-concatenation | WARNING: this is a DIFFERENT enum from sect-P-* — this is the work-order status pipeline (Queued/Picking/Production/Completed), not the print-job status enum. Do not merge/confuse the two patterns. Composed at runtime via 'sect-' + s, NOT a template literal — corrected from the initial task assumption after verifying assets/js/production-module.js:1479. |
 
 ## localStorage Key Policy (ADR decisions D3/D8)
 
