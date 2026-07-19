@@ -71,7 +71,6 @@
             if (name === 'renderProductionTelemetryPreview') return typeof window.renderProductionTelemetryPreview === 'function' ? window.renderProductionTelemetryPreview : null;
             if (name === 'renderVelocityzFGI') return typeof window.renderVelocityzFGI === 'function' ? window.renderVelocityzFGI : null;
             if (name === 'renderSOPAuditLogRows') return typeof window.renderSOPAuditLogRows === 'function' ? window.renderSOPAuditLogRows : null;
-            if (name === 'renderPackerzTelemetryPreview') return typeof window.renderPackerzTelemetryPreview === 'function' ? window.renderPackerzTelemetryPreview : null;
             if (name === 'renderSimulatorOrder') return typeof window.renderSimulatorOrder === 'function' ? window.renderSimulatorOrder : null;
             if (name === 'renderActualNetList') return typeof window.renderActualNetList === 'function' ? window.renderActualNetList : null;
             if (name === 'renderCeoTerminal') return typeof window.renderCeoTerminal === 'function' ? window.renderCeoTerminal : null;
