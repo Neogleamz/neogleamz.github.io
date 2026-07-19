@@ -1461,14 +1461,6 @@ async function syncAndCalculate() {
 }
 
 // --- 13. NEW BACKUP & RESTORE SYSTEM ---
-window.openBackupModal = function() {
-    document.getElementById('backupModal').style.display = 'flex';
-    document.getElementById('restorePreview').style.display = 'none';
-    document.getElementById('importBackupFile').value = '';
-}
-
-window.closeBackupModal = function() { document.getElementById('backupModal').style.display = 'none'; }
-
 const APP_TABLES = [
     { tableName: 'app_settings', sheetName: 'App_Settings', conflictKey: 'setting_key' },
     { tableName: 'cyclez', sheetName: 'Cyclez', conflictKey: 'id' },

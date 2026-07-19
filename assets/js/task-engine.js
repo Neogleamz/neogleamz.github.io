@@ -840,27 +840,6 @@ window.teOpenTaskContext = function(taskId) {
                 }
             }
             
-            const cycleSelect = document.getElementById('te-flyout-cycle');
-            if (cycleSelect) {
-                // Populate options first
-                let opts = '<option value="">No Section</option>';
-                let currentUserId = window.currentUser ? window.currentUser.id : null;
-                
-                let relevantCycles = taskEngineDB.cyclez.filter(c => {
-                    if (window.teActiveProjectId) {
-                        return c.project_id === window.teActiveProjectId;
-                    } else {
-                        return !c.project_id && c.assigned_to_id === currentUserId;
-                    }
-                });
-                
-                relevantCycles.forEach(c => {
-                    opts += `<option value="${c.id}">${c.title}</option>`;
-                });
-                cycleSelect.innerHTML = window.safeHTML(opts);
-                cycleSelect.value = task.cycle_id || '';
-            }
-            
             const startDateInput = document.getElementById('te-flyout-start-date');
             if (startDateInput) {
                 let meta = JSON.parse(JSON.stringify(task.metadata || {}));
@@ -2290,7 +2269,6 @@ document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'c' && isTaskPlannerOpen) {
         e.preventDefault();
         // Create Task shortcut triggered
-        // FUTURE: document.getElementById('newTaskInput').focus();
     }
 });
 

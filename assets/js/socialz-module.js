@@ -403,15 +403,6 @@
                 return socialzSortDirection === 'asc' ? res : -res;
             });
 
-            // Update Stats
-            if(document.getElementById('stat-total-skaters')) document.getElementById('stat-total-skaters').innerText = filtered.length;
-            const reach = filtered.reduce((a, c) => a + (c.rawFollowers || 0), 0);
-            if(document.getElementById('stat-total-reach')) document.getElementById('stat-total-reach').innerText = formatCountShort(reach);
-            const stylesCount = {};
-            filtered.forEach(s => { if(s.style) s.style.split(';').forEach(st => { const cl = st.trim(); if(cl) stylesCount[cl] = (stylesCount[cl] || 0) + 1; }); });
-            if(document.getElementById('stat-top-style')) document.getElementById('stat-top-style').innerText = Object.keys(stylesCount).length > 0 ? Object.keys(stylesCount).reduce((a, b) => stylesCount[a] > stylesCount[b] ? a : b) : '-';
-            if(document.getElementById('stat-avg-eng')) document.getElementById('stat-avg-eng').innerText = filtered.length > 0 ? (2.4 + (reach % 100) / 100).toFixed(1) + "%" : "0%";
-
             if (filtered.length === 0) {
                 grid.innerHTML = ''; emptyState.classList.remove('hidden');
             } else {

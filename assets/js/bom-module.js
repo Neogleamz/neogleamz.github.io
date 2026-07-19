@@ -87,8 +87,6 @@ window.updateLaborCosts = async function(eventOrBtn) {
         if(typeof populateDropdowns === 'function') populateDropdowns();
         window.renderProductList(); window.renderProductBOM();
         if(typeof renderFgiTable === 'function') renderFgiTable();
-        let aTab = document.getElementById('analytics-tab');
-        if(typeof renderAnalyticsDashboard === 'function' && aTab && aTab.classList.contains('active')) renderAnalyticsDashboard();
     });
 }
 
