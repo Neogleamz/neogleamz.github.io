@@ -15,7 +15,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🔴 P0 Critical (Blockers & Hotfixes)
-*Clean sweep — all P0 blockers successfully completed and archived!* ✅
+- [ ] `fix/regex-playground-preset-bugs` : **Regex/Parcel Preset Playground — Crash + Hidden Buttons** - Two naming-mismatch bugs discovered during `debt/nomenclature-remediation` Batch 7's nomenclature trace (not fixed there — out of that batch's scope). **Bug 1 (CRITICAL, crash):** `getCurrentUIRules()` (system-tools-module.js:114-115) reads nonexistent DOM ids `regexPostage`/`regexMakeup` (real ids are `regexFeeStructure`/`regexSecondaryFee`) — every click of "✅ Apply Active Rules," "💾 Save As New," or "🔄 Overwrite" on the **Orderz** side of the Regex Playground throws `TypeError: Cannot read properties of null (reading 'value')`. **Bug 2 (MEDIUM, silent):** `renderParcelPresetDropdown()` (system-tools-module.js:452-453) reads nonexistent `btnDeleteParcelPreset`/`btnOverwriteParcelPreset` (real shared ids are `btnDeletePreset`/`btnOverwritePreset`) — Delete/Overwrite buttons never appear on the **Parcelz** side even when a saved preset is selected. Optional bonus (Bug 3, LOW): `getCurrentParcelUIRules()` silently omits `regexGroupWeight` from saved rules. (Plan: [docs/plans/fix-regex-playground-preset-bugs.md](../docs/plans/fix-regex-playground-preset-bugs.md)) [Files: assets/js/system-tools-module.js]
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 *Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
