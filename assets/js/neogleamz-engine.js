@@ -1162,12 +1162,6 @@ window.doNeoSidebarResize = function(e) {
         }
     }
     
-    // Fallback logic for Packerz custom modal split
-    if(!sidebar && document.getElementById('packerzLiveSopSplitWrapper')?.offsetParent !== null) {
-        activeWrapper = document.getElementById('packerzLiveSopSplitWrapper');
-        sidebar = document.getElementById('packerzLiveSopLeftPane');
-    }
-    
     // Fallback logic for Packerz Terminal Main Kanban Board
     if(!sidebar && document.getElementById('packerzKanbanWrapper')?.offsetParent !== null) {
         activeWrapper = document.getElementById('packerzKanbanWrapper');

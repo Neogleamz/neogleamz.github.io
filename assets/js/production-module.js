@@ -2456,7 +2456,7 @@ window.executeSopPrint = function(printType) {
     }
 
     try {
-        if(!currentWO && typeof currentWO === 'undefined' && !window.activePrintTargetOverride && (!document.getElementById('sopModalWrapper') || document.getElementById('sopModalWrapper').style.display === 'none')) {
+        if(!currentWO && typeof currentWO === 'undefined' && !window.activePrintTargetOverride) {
             sysLog("Cannot print SOP without a valid target context.", true);
             return;
         }
@@ -2472,9 +2472,6 @@ window.executeSopPrint = function(printType) {
         if (window.activePrintTargetOverride) {
             targetProductName = window.activePrintTargetOverride;
             headerTitle = "SOP: " + targetProductName;
-        } else if(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none') {
-            targetProductName = currentProductSOP || targetProductName;
-            headerTitle = "SOP: " + targetProductName;
         }
 
         // Helper to extract qaChecks and steps correctly
@@ -2488,7 +2485,7 @@ window.executeSopPrint = function(printType) {
         }
 
         // Sub-assemblies routing if present and NO TARGET OVERRIDE
-        if(currentWO && currentWO.routing && !window.activePrintTargetOverride && !(document.getElementById('sopModalWrapper') && document.getElementById('sopModalWrapper').style.display !== 'none')) {
+        if(currentWO && currentWO.routing && !window.activePrintTargetOverride) {
             Object.keys(currentWO.routing).forEach(sub => {
                 if(currentWO.routing[sub].build > 0) {
                     let subPayload = extractPayload(sopsDB[sub]);

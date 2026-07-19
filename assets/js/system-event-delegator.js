@@ -671,9 +671,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_showFulfillzPane_labelz':
                     showFulfillzPane('labelz');
                     break;
-                case 'click_document_getElementById_paneFu':
-                    document.getElementById('paneFulfillzSopAdmin').style.display='flex';;
-                    break;
                 case 'click_openSOPAuditLog':
                     openSOPAuditLog();
                     break;
@@ -1018,12 +1015,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_addCeoUnifiedSelection':
                     addCeoUnifiedSelection();
-                    break;
-                case 'click_savePackerzSOPToDB':
-                    savePackerzSOPToDB();
-                    break;
-                case 'click_document_getElementById_paneFu_11':
-                    document.getElementById('paneFulfillzSopAdmin').style.display='none';
                     break;
                 case 'click_if_typeof_toggleHorizontalPrev_12':
                     if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('packerzSopLeftPane', 'packerzSopPreviewCol', this);;
@@ -1401,12 +1392,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_removePackerzSOPRow':
                     if(window.removePackerzSOPRow) window.removePackerzSOPRow(el);
-                    break;
-                case 'click_closePackerzAuditOverlay':
-                    {
-                        let ol = document.getElementById('packerzAuditOverlay');
-                        if (ol) ol.remove();
-                    }
                     break;
                 case 'click_navigateSOPMediaFolder':
                     if(window.navigateSOPMediaFolder) window.navigateSOPMediaFolder(el.getAttribute('data-path'));
@@ -1844,9 +1829,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_window_recomputeVelocityzBasel':
                     window.recomputeVelocityzBaseline();
                     break;
-                case 'change_loadPackerzSopFromDB':
-                    loadPackerzSopFromDB();
-                    break;
                 case 'change_uploadSOPMedia_this_files_0':
                     uploadSOPMedia(el.files[0]);
                     break;
@@ -1975,9 +1957,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'input_filterArchiveList_this_value':
                     filterArchiveList(el.value);
-                    break;
-                case 'input_renderPackerzTelemetryPreview':
-                    renderPackerzTelemetryPreview();
                     break;
                 case 'input_filterSOPAuditLog':
                     filterSOPAuditLog();
