@@ -2271,16 +2271,6 @@ if (!window.isPackerzListenerBound) {
         }
     });
 
-    document.addEventListener('mousedown', (e) => {
-        const el = e.target;
-        if (el.dataset.appMousedown === 'initPackerzResize') {
-            if(typeof window.initUnifiedSopResizer === 'function') {
-                const targetLeftPane = document.getElementById('packerzInlineSopLeftPane') ? 'packerzInlineSopLeftPane' : 'packerzLiveSopLeftPane';
-                window.initUnifiedSopResizer(e, targetLeftPane, 'packerzLiveSopSplitWrapper', null, true);
-            }
-        }
-    });
-
     window.isPackerzListenerBound = true;
 }
 

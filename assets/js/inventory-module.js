@@ -412,49 +412,6 @@ async function handleInvEdit(cell, key, p, c, a, sq, mode) {
     } catch(e) { sysLog(e.message, true); setMasterStatus("Error", "mod-error"); cell.innerText = oldValTemp; }
 }
 
-async function runProductionBatch() {
-    try { 
-        const batchProductSelectEl = document.getElementById('batchProductSelect');
-        const batchQtyEl = document.getElementById('batchQty');
-        if (!batchProductSelectEl || !batchQtyEl) { sysLog('runProductionBatch: #batchProductSelect/#batchQty not found in DOM.', true); return; }
-        const n = batchProductSelectEl.value; const q = parseFloat(batchQtyEl.value);
-        let batchType = "Production";
-        if(document.getElementById('batchTypeSelect')) batchType = document.getElementById('batchTypeSelect').value;
-        if(!n || isNaN(q) || q<=0) return alert("Select product & valid Qty."); 
-        sysLog(`Batch Run [${batchType}]: ${q}x ${n}`); setSysProgress(20, 'working'); 
-        
-        let raw = getRawMaterials(n, q); let keys = Object.keys(raw); 
-        if(keys.length===0){ setSysProgress(0,'working'); return alert("Recipe empty."); } 
-        
-        let ups = keys.map(k => { 
-            if(!inventoryDB[k]) inventoryDB[k] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
-            inventoryDB[k].consumed_qty += raw[k];
-            if(batchType === 'Prototype') inventoryDB[k].prototype_consumed_qty = (inventoryDB[k].prototype_consumed_qty||0) + raw[k];
-            else inventoryDB[k].production_consumed_qty = (inventoryDB[k].production_consumed_qty||0) + raw[k];
-            return {item_uuid: window.uuidMap[k], consumed_qty: inventoryDB[k].consumed_qty, manual_adjustment: inventoryDB[k].manual_adjustment, produced_qty: inventoryDB[k].produced_qty, sold_qty: inventoryDB[k].sold_qty, min_stock: inventoryDB[k].min_stock, scrap_qty: inventoryDB[k].scrap_qty, prototype_consumed_qty: inventoryDB[k].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[k].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[k].production_consumed_qty||0, prototype_produced_qty: inventoryDB[k].prototype_produced_qty||0}; 
-        }); 
-        
-        let fgiKey = `RECIPE:::${n}`;
-        if(!inventoryDB[fgiKey]) inventoryDB[fgiKey] = {consumed_qty:0, manual_adjustment:0, produced_qty:0, sold_qty:0, min_stock:0, scrap_qty:0, prototype_consumed_qty:0, assembly_consumed_qty:0, production_consumed_qty:0, prototype_produced_qty:0};
-        
-        if(batchType === 'Prototype') {
-            inventoryDB[fgiKey].prototype_produced_qty = (inventoryDB[fgiKey].prototype_produced_qty||0) + q;
-        } else {
-            inventoryDB[fgiKey].produced_qty += q;
-        }
-        ups.push({item_uuid: window.uuidMap[fgiKey], consumed_qty: inventoryDB[fgiKey].consumed_qty, manual_adjustment: inventoryDB[fgiKey].manual_adjustment, produced_qty: inventoryDB[fgiKey].produced_qty, sold_qty: inventoryDB[fgiKey].sold_qty, min_stock: inventoryDB[fgiKey].min_stock, scrap_qty: inventoryDB[fgiKey].scrap_qty, prototype_consumed_qty: inventoryDB[fgiKey].prototype_consumed_qty||0, assembly_consumed_qty: inventoryDB[fgiKey].assembly_consumed_qty||0, production_consumed_qty: inventoryDB[fgiKey].production_consumed_qty||0, prototype_produced_qty: inventoryDB[fgiKey].prototype_produced_qty||0});
-
-        setSysProgress(60, 'working'); 
-        const {error} = await supabaseClient.from('inventory_consumption').upsert(ups, {onConflict:'item_uuid'}); 
-        if(error) throw new Error(error.message); 
-        
-        setSysProgress(100, 'success'); sysLog(`${batchType} Batch Complete.`); showToast(`✅ Built ${q}x ${n} (${batchType}) and deducted materials.`); 
-        const batchQtyResetEl = document.getElementById('batchQty');
-        if (batchQtyResetEl) batchQtyResetEl.value = 1;
-        window.renderInventoryTable(); window.updateCcMngrStock(); setTimeout(()=>setSysProgress(0,'working'),3000);
-    } catch(e) { setSysProgress(100, 'error'); sysLog(e.message, true); showToast("Batch Error: " + e.message, 'error'); }
-}
-
 window.resetInventoryConsumptionLocally = async function() {
     inventoryDB = {};
     if (typeof window.renderInventoryTable === 'function') window.renderInventoryTable();
@@ -3214,7 +3171,6 @@ if (typeof window !== 'undefined') {
     window.renderFgiTable = typeof renderFgiTable !== 'undefined' ? renderFgiTable : undefined;
     window.sortInventory = typeof sortInventory !== 'undefined' ? sortInventory : undefined;
     window.sortFGI = typeof sortFGI !== 'undefined' ? sortFGI : undefined;
-    window.runProductionBatch = typeof runProductionBatch !== 'undefined' ? runProductionBatch : undefined;
 }
 
 

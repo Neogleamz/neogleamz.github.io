@@ -1190,18 +1190,14 @@ function renderWOList() {
         const ui = document.getElementById('woListUI'); ui.innerHTML = window.safeHTML("");
 
         let activeBatches = 0;
-        let totalUnits = 0;
         workOrdersDB.forEach(wo => {
             if (wo.status === 'Archived') return;
             if (wo.status !== 'Completed') {
                 activeBatches++;
-                totalUnits += (parseFloat(wo.qty) || 0);
             }
         });
         const batchEl = document.getElementById('activeBatchCount');
-        const unitEl = document.getElementById('activeUnitCount');
         if (batchEl) batchEl.innerText = activeBatches;
-        if (unitEl) unitEl.innerText = totalUnits;
 
         let activeCount = workOrdersDB.filter(w => w.status !== 'Archived').length;
         if(activeCount === 0) { ui.innerHTML = window.safeHTML(
@@ -1485,7 +1481,6 @@ function renderActiveWO(id) {
         document.getElementById('pipe-Completed').innerHTML = window.safeHTML('4. Finalize Batch');
 
         let wip = wo.wip_state || {};
-        const lockBtn = document.getElementById('sopLockBtn'); if(lockBtn) lockBtn.innerText = isSOPLocked ? '🔒' : '🔓';
 
         if (!window._pipelineTimerInterval) {
             window._pipelineTimerInterval = setInterval(() => {
