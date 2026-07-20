@@ -179,6 +179,17 @@ function collectStringLiteralsLine(line, allStringLiterals) {
   while ((m = RE_STRING_LITERAL.exec(line))) allStringLiterals.add(m[1] || m[2]);
 }
 
+// N2 self-match guard: a `case 'token':` label inside system-event-delegator.js is a
+// DECLARATION of that token, not proof that anything else in the codebase emits it via
+// data-click="${...}". Strip only the matched case-label text (not the whole line) before
+// feeding the delegator file's own lines into the shared allStringLiterals pool used by
+// checkN2's FM-6 indirect-match exemption — any OTHER quoted string on the same line (or
+// any other line in the file) is unaffected and still counts as legitimate evidence.
+const RE_CASE_LABEL = /\bcase\s+'([^']+)'\s*:/g;
+function stripDelegatorCaseLabels(line, isDelegatorFile) {
+  return isDelegatorFile ? line.replace(RE_CASE_LABEL, '') : line;
+}
+
 // --- localStorage keys ---
 const RE_LS_LITERAL  = /localStorage\.(setItem|getItem|removeItem)\(\s*['"]([^'"$]+)['"]/g;
 const RE_LS_TEMPLATE = /localStorage\.(setItem|getItem|removeItem)\(\s*`([^`]*?)\$\{/g;
@@ -232,6 +243,7 @@ function collectPass1(fileRecords) {
   DELEGATED_EVENT_TYPES.forEach(t => emitterTokens.set(t, new Map()));
 
   for (const rec of fileRecords) {
+    const isDelegatorFile = rec.absPath === DELEGATOR_FILE;
     for (let i = 0; i < rec.lines.length; i++) {
       const line = rec.lines[i];
       const loc  = { file: rec.relPath, line: i + 1 };
@@ -239,7 +251,7 @@ function collectPass1(fileRecords) {
       collectDomIdDeclLine(line, literalIds, dynamicPrefixes);
       collectDomIdLookupLine(line, loc, domIdLookups);
       collectEmitterTokenLine(line, loc, emitterTokens, indirectEmitters);
-      collectStringLiteralsLine(line, allStringLiterals);
+      collectStringLiteralsLine(stripDelegatorCaseLabels(line, isDelegatorFile), allStringLiterals);
       collectLocalStorageLine(line, loc, localStorageKeys);
       collectCssUsageLine(line, cssClassUsages);
     }
@@ -457,7 +469,12 @@ function checkN7(registry) {
       identifier: 'docs/nomenclature_dictionary.md', message: 'Dictionary missing — run npm run generate:nomenclature-dict' }];
   }
   const actual = fs.readFileSync(DICT_PATH, 'utf8');
-  if (actual !== expected) {
+  // Normalize CRLF -> LF on both sides before comparing. Windows core.autocrlf rewrites the
+  // on-disk file with \r\n on every checkout/stash round-trip; buildOutput() always emits
+  // \n-only (generate-nomenclature-dictionary.js:247 and every internal .join('\n')). Without
+  // this, a content-identical file trips a false N7_DICT_STALE unrelated to real drift.
+  const normalizeEol = s => s.replace(/\r\n/g, '\n');
+  if (normalizeEol(actual) !== normalizeEol(expected)) {
     return [{ ruleId: 'N7_DICT_STALE', severity: 'MODERATE', file: 'docs/nomenclature_dictionary.md', line: 1,
       identifier: 'docs/nomenclature_dictionary.md', message: 'Dictionary is stale vs. registry — run npm run generate:nomenclature-dict' }];
   }
