@@ -15,7 +15,7 @@ This document acts as the permanent, living task tracker integrated directly wit
 > * **🟡 P2 Medium Priority:** UI enhancements, workflow automations, and quality-of-life updates.
 > * **🟢 P3 Backlog:** Approved ideas and long-term targets pending active development.
 ### 🔴 P0 Critical (Blockers & Hotfixes)
-- [ ] `fix/regex-playground-preset-bugs` : **Regex/Parcel Preset Playground — Crash + Hidden Buttons** - Two naming-mismatch bugs discovered during `debt/nomenclature-remediation` Batch 7's nomenclature trace (not fixed there — out of that batch's scope). **Bug 1 (CRITICAL, crash):** `getCurrentUIRules()` (system-tools-module.js:114-115) reads nonexistent DOM ids `regexPostage`/`regexMakeup` (real ids are `regexFeeStructure`/`regexSecondaryFee`) — every click of "✅ Apply Active Rules," "💾 Save As New," or "🔄 Overwrite" on the **Orderz** side of the Regex Playground throws `TypeError: Cannot read properties of null (reading 'value')`. **Bug 2 (MEDIUM, silent):** `renderParcelPresetDropdown()` (system-tools-module.js:452-453) reads nonexistent `btnDeleteParcelPreset`/`btnOverwriteParcelPreset` (real shared ids are `btnDeletePreset`/`btnOverwritePreset`) — Delete/Overwrite buttons never appear on the **Parcelz** side even when a saved preset is selected. Optional bonus (Bug 3, LOW): `getCurrentParcelUIRules()` silently omits `regexGroupWeight` from saved rules. (Plan: [docs/plans/fix-regex-playground-preset-bugs.md](../docs/plans/fix-regex-playground-preset-bugs.md)) [Files: assets/js/system-tools-module.js]
+*Clean sweep — all P0 blockers successfully completed and archived!* ✅
 
 ### 🟢 P3 Backlog (Ideas & Sandbox)
 *Clean sweep — all backlog sandbox ideas successfully completed and archived!* ✅
@@ -54,6 +54,14 @@ This document acts as the permanent, living task tracker integrated directly wit
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Regex/Parcel Preset Playground — Crash + Hidden Buttons (branch `fix/regex-playground-preset-bugs`)**
+*(Archived — 2026-07-19)*
+*Logged by `/idea_intake` during `debt/nomenclature-remediation` Batch 7's discovery — 2026-07-19.*
+
+#### 🔴 P0 — Crash + Hidden Buttons
+- [🚀] `fix/regex-playground-preset-bugs` : **Regex/Parcel Preset Playground — Crash + Hidden Buttons** - Two naming-mismatch bugs discovered during `debt/nomenclature-remediation` Batch 7's nomenclature trace (not fixed there — out of that batch's scope). **Bug 1 (CRITICAL, crash):** `getCurrentUIRules()` (system-tools-module.js:114-115) reads nonexistent DOM ids `regexPostage`/`regexMakeup` (real ids are `regexFeeStructure`/`regexSecondaryFee`) — every click of "✅ Apply Active Rules," "💾 Save As New," or "🔄 Overwrite" on the **Orderz** side of the Regex Playground threw `TypeError: Cannot read properties of null (reading 'value')`. **Bug 2 (MEDIUM, silent):** `renderParcelPresetDropdown()` (system-tools-module.js:452-453) read nonexistent `btnDeleteParcelPreset`/`btnOverwriteParcelPreset` (real shared ids are `btnDeletePreset`/`btnOverwritePreset`) — Delete/Overwrite buttons never appeared on the **Parcelz** side. *Done — user opted to bundle the optional Bug 3 too (`getCurrentParcelUIRules()` was silently omitting `regexGroupWeight` from saved rules, masked by a load-time default-backfill). All 3 fixed via 4 corrected `getElementById` target strings + 1 new object-property line, single file. Independent re-verification (fresh explore-mapper + planner pass) confirmed every line number and call chain from the original discovery still held. Nomenclature side effect: N1_GHOST_ID 24→22 (not the predicted →20) — fixing the ghost reads correctly cleared 4 old findings, but pointing `getElementById` at `regexSecondaryFee`/`regexGroupWeight` for the first time surfaced 2 NEW findings, because `tools/nomenclature-registry.json`'s Batch-7 allowlist regex family includes `FeeStructure` as a recognized alternation but not `SecondaryFee`/`GroupWeight` — both have real confirmed producers, this is a registry-completeness gap, not a new bug. ⚠️ Follow-up flagged for a future `debt/nomenclature-remediation` batch: add `SecondaryFee`/`GroupWeight` to that allowlist pattern. Verified: 0 XSS violations (before=0/after=0), 59/59 tests, 0 lint errors/warnings.* (Plan: [docs/plans/fix-regex-playground-preset-bugs.md](../docs/plans/fix-regex-playground-preset-bugs.md)) [Files: assets/js/system-tools-module.js]
 
 ### Target: `main`
 **Epic: Hygiene Micro-Batch (branch `debt/hygiene`)**

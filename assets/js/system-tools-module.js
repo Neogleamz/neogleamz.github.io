@@ -111,8 +111,8 @@ window.getCurrentUIRules = function() {
         regexOrderNum: document.getElementById('regexOrderNum').value.trim(),
         regexOrderDate: document.getElementById('regexOrderDate').value.trim(),
         regexOrderTotal: document.getElementById('regexOrderTotal').value.trim(),
-        regexPostage: document.getElementById('regexPostage').value.trim(),
-        regexMakeup: document.getElementById('regexMakeup').value.trim(),
+        regexPostage: document.getElementById('regexFeeStructure').value.trim(),
+        regexMakeup: document.getElementById('regexSecondaryFee').value.trim(),
         regexLineItemNum: document.getElementById('regexLineItemNum').value.trim(),
         regexItemName: document.getElementById('regexItemName').value.trim(),
         regexQuantity: document.getElementById('regexQuantity').value.trim(),
@@ -415,6 +415,7 @@ window.getCurrentParcelUIRules = function() {
         regexLineItemNum: document.getElementById('regexParcelLineItemNum').value.trim(),
         regexItemName: document.getElementById('regexParcelItemName').value.trim(),
         regexQuantity: document.getElementById('regexParcelQuantity').value.trim(),
+        regexGroupWeight: document.getElementById('regexGroupWeight').value.trim(),
         regexSpecs: document.getElementById('regexParcelSpecs').value.trim()
     };
 };
@@ -449,8 +450,8 @@ window.renderParcelPresetDropdown = function() {
         sel.appendChild(opt);
     });
     
-    let btnDelete = document.getElementById('btnDeleteParcelPreset');
-    let btnOver = document.getElementById('btnOverwriteParcelPreset');
+    let btnDelete = document.getElementById('btnDeletePreset');
+    let btnOver = document.getElementById('btnOverwritePreset');
     if (window.ACTIVE_PARCEL_PROFILE_INDEX === 0) {
         if(btnDelete) btnDelete.style.display = 'none';
         if(btnOver) btnOver.style.display = 'none';
