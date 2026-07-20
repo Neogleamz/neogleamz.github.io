@@ -1391,13 +1391,11 @@ window.initializeCcSyncChannel = function() {
         }
 
         // Update UI states to connected
-        const statusCheck = document.getElementById('ccMobileBridgeStatus');
         const statusIndicator = document.getElementById('ccScannerStatusIndicator');
         const qrContainer = document.getElementById('ccScannerQRContainer');
         const screenContainer = document.getElementById('ccRemotePreviewScreenContainer');
         const routeBar = document.getElementById('pcRouteBar');
-        
-        if (statusCheck) statusCheck.innerHTML = '🟢 📱 Phone Connected | Stream Active';
+
         if (statusIndicator) {
             statusIndicator.style.background = '#10b981';
             statusIndicator.style.boxShadow = '0 0 10px #10b981';
@@ -1433,9 +1431,6 @@ window.initializeCcSyncChannel = function() {
     window.ccSyncChannel.on('broadcast', { event: 'REMOTE_FRAME_STREAM' }, (envelope) => {
         const payload = envelope.payload;
         if (payload && payload.frame) {
-            const screenOld = document.getElementById('ccRemotePreviewScreen');
-            if (screenOld) screenOld.src = payload.frame;
-            
             const screenNew = document.getElementById('stockzAuditMobilePreviewScreen');
             if (screenNew) screenNew.src = payload.frame;
         }
@@ -1567,20 +1562,6 @@ window.initializeCcSyncChannel = function() {
                         window.closeStockzAuditModal();
                     }
                 }
-            } else {
-                const select = document.getElementById('ccMngrItemSelect');
-                const qtyInput = document.getElementById('ccMngrQtyInput');
-                if (select && qtyInput) {
-                    select.value = payload.value;
-                    qtyInput.value = payload.qty;
-                    
-                    // Execute the native PC save manual cycle count logic!
-                    await window.saveManualCycleCount();
-                    
-                    if (payload.close) {
-                        window.closeCycleCountManager();
-                    }
-                }
             }
         }
     });
@@ -1606,9 +1587,6 @@ window.stopCycleCount = async function() {
         }
         ccLocalQrScanner = null;
     }
-    const readerEl = document.getElementById("barcode-reader");
-    if (readerEl) readerEl.innerHTML = window.safeHTML('');
-
     // 2. Unsubscribe cleanly from Supabase Realtime channel
     if (window.ccSyncChannel) {
         try {
@@ -1623,9 +1601,6 @@ window.stopCycleCount = async function() {
         window.ccSyncChannel = null;
     }
     window.ccSessionId = null;
-
-    let card = document.getElementById('inlineCycleScannerCard');
-    if(card) card.style.display = 'none';
 };
 
 window._lastScannedBarcode = null;
@@ -1642,12 +1617,6 @@ window.onScanSuccess = function(decodedText) {
     if (beep) {
         beep.currentTime = 0;
         beep.play().catch((err)=>{ sysLog("Scanner beep audio playback blocked/failed: " + err); });
-    }
-    
-    let flash = document.getElementById('scanner-success-flash');
-    if (flash) {
-        flash.style.display = 'block';
-        setTimeout(() => flash.style.display = 'none', 300);
     }
 
     let actualKey;
