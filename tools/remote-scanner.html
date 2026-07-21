@@ -12,7 +12,8 @@
     <!-- Supabase JS SDK & Html5Qrcode CDNs -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js" integrity="sha384-rneZSW/1QE+3/U5/u+/7eRNi/tRc+SzS+yXy36fltr1tDN9EHaVo1Bwz2Z8o8DA4" crossorigin="anonymous"></script>
+
     <style>
         :root {
             --bg-dark: #070b13;
@@ -872,6 +873,22 @@
             }
         }
 
+        // XSS defense-in-depth: this standalone page has no neogleamz-engine.js, so it gets its
+        // own minimal DOMPurify wrapper. Same unconditional-call contract as the main app's
+        // window.safeHTML (assets/js/neogleamz-engine.js:52-64) — never a ternary, always call
+        // window.safeHTML(x) directly. Deliberately uses DOMPurify's plain default allowlist (no
+        // ADD_TAGS/ADD_ATTR) — this page never renders iframe/video/data-click-token content, so
+        // the wider main-app allowlist would only add unused surface. Least privilege.
+        window.safeHTML = function(dirtyHTML) {
+            if (typeof DOMPurify !== 'undefined') {
+                return DOMPurify.sanitize(dirtyHTML);
+            }
+            console.warn("DOMPurify not loaded. Using fallback HTML escaper.");
+            const div = document.createElement('div');
+            div.innerText = dirtyHTML;
+            return div.innerHTML;
+        };
+
         function updateStatus(state, title, subtitle) {
             statusSpinner.style.display = 'none';
             statusSuccess.style.display = 'none';
@@ -1053,15 +1070,25 @@
                 groups[prefix].push({ value: k, text: name });
             }
             
-            let html = '<option value="">-- Choose Item Natively --</option>';
+            // Native DOM construction (createElement/appendChild), mirroring the ITEM_DIRECTORY
+            // handler above — zero string-based HTML, so this sink can never become an innerHTML
+            // XSS vector regardless of future edits, without needing DOMPurify at all.
+            selectBox.innerHTML = '';
+            const blankOpt = document.createElement('option');
+            blankOpt.value = '';
+            blankOpt.text = '-- Choose Item Natively --';
+            selectBox.appendChild(blankOpt);
             for (let prefix in groups) {
-                html += `<optgroup label="${prefix}">`;
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = prefix;
                 groups[prefix].sort((a,b) => a.text.localeCompare(b.text)).forEach(i => {
-                    html += `<option value="${i.value}">${i.text}</option>`;
+                    const opt = document.createElement('option');
+                    opt.value = i.value;
+                    opt.text = i.text;
+                    optgroup.appendChild(opt);
                 });
-                html += `</optgroup>`;
+                selectBox.appendChild(optgroup);
             }
-            selectBox.innerHTML = html;
         }
 
                 // Listen for PC-side dynamic stock balances updates
@@ -1078,7 +1105,7 @@
                         if (payload.gridHtml) {
                             const gridContainer = document.getElementById('mobileStockPanel');
                             if (gridContainer) {
-                                gridContainer.innerHTML = `<div class="stock-grid" style="grid-template-columns: repeat(3, 1fr); gap: 6px;">${payload.gridHtml}</div>`;
+                                gridContainer.innerHTML = window.safeHTML(`<div class="stock-grid" style="grid-template-columns: repeat(3, 1fr); gap: 6px;">${payload.gridHtml}</div>`);
                             }
                         }
                         
@@ -1102,7 +1129,7 @@
                             if (alertBadge && p.alertBadgeHtml) {
                                 // Extract inner text and color from PC's badge
                                 const tempDiv = document.createElement('div');
-                                tempDiv.innerHTML = p.alertBadgeHtml;
+                                tempDiv.innerHTML = window.safeHTML(p.alertBadgeHtml);
                                 const child = tempDiv.firstElementChild;
                                 if (child) {
                                     alertBadge.innerText = child.innerText;
@@ -1120,7 +1147,12 @@
                     if (payload && payload.html) {
                         const histContainer = document.getElementById('mobileHistoryContent');
                         if (histContainer) {
-                            histContainer.innerHTML = payload.html;
+                            // Defense-in-depth: payload.html is already sanitized by the sender
+                            // (inventory-module.js's refreshStockzAuditHistory now broadcasts
+                            // window.safeHTML(h) instead of raw h — see fix-remote-scanner-history-xss
+                            // plan §1) — re-sanitize here too so this sink never trusts the network
+                            // payload alone.
+                            histContainer.innerHTML = window.safeHTML(payload.html);
                         }
                     }
                 });

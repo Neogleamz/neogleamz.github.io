@@ -2716,12 +2716,13 @@ window.refreshStockzAuditHistory = async function() {
             </details>`;
         });
         
-        historyContainer.innerHTML = window.safeHTML(h);
+        const safeH = window.safeHTML(h);
+        historyContainer.innerHTML = safeH;
         if (window.ccSyncChannel && window.currentAuditItemKey) {
             window.ccSyncChannel.send({
                 type: 'broadcast',
                 event: 'PC_HISTORY_UPDATE',
-                payload: { html: h }
+                payload: { html: safeH }
             }).catch(()=>{});
         }
     } catch(e) {
