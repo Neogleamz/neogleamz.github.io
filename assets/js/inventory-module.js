@@ -1391,9 +1391,10 @@ window.initializeCcSyncChannel = function() {
         }
 
         // Update UI states to connected
-        const statusIndicator = document.getElementById('ccScannerStatusIndicator');
-        const qrContainer = document.getElementById('ccScannerQRContainer');
-        const screenContainer = document.getElementById('ccRemotePreviewScreenContainer');
+        const statusIndicator = document.getElementById('stockzAuditScannerStatusIndicator');
+        const qrContainer = document.getElementById('stockzAuditMobileQRContainer');
+        const screenContainer = document.getElementById('stockzAuditMobilePreviewContainer');
+        const placeholder = document.getElementById('stockzAuditPhoneOnlyPlaceholder');
         const routeBar = document.getElementById('pcRouteBar');
 
         if (statusIndicator) {
@@ -1402,12 +1403,11 @@ window.initializeCcSyncChannel = function() {
         }
         if (qrContainer) qrContainer.style.display = 'none';
         if (screenContainer) screenContainer.style.display = 'flex';
+        if (placeholder) placeholder.style.display = (currentPreviewMode === 'phone') ? 'flex' : 'none';
         if (routeBar) routeBar.style.display = 'flex';
-        
-        window.updateCCRouteUI(currentPreviewMode);
-        
+
         // Broadcast the serialized grouped item dropdown directory list to the phone cockpit
-        const select = document.getElementById('ccMngrItemSelect');
+        const select = document.getElementById('stockzAuditItemSelect');
         const items = [];
         if (select) {
             for (let i = 0; i < select.options.length; i++) {
@@ -1441,8 +1441,7 @@ window.initializeCcSyncChannel = function() {
         const payload = envelope.payload;
         if (payload && payload.mode) {
             currentPreviewMode = payload.mode;
-            window.updateCCRouteUI(currentPreviewMode);
-            
+
             const auditModal = document.getElementById('stockzAuditModal');
             if (auditModal && auditModal.style.display !== 'none') {
                 const qrContainer = document.getElementById('stockzAuditMobileQRContainer');
@@ -1485,11 +1484,7 @@ window.initializeCcSyncChannel = function() {
     window.ccSyncChannel.on('broadcast', { event: 'MOBILE_ITEM_SELECTED' }, (envelope) => {
         const payload = envelope.payload;
         if (payload && typeof payload.value !== 'undefined') {
-            const select = document.getElementById('ccMngrItemSelect');
-            if (select) {
-                select.value = payload.value;
-                window.updateCcMngrStock();
-            }
+            window.selectStockzAuditItem(payload.value);
         }
     });
 
@@ -1691,55 +1686,6 @@ window.onScanSuccess = function(decodedText) {
         }
     }, 100);
 };
-
-// Bidirectional Swapping route logic
-window.updateCCRouteUI = function(mode) {
-    const btnPhone = document.getElementById('pcRoutePhone');
-    const btnPC = document.getElementById('pcRoutePC');
-    const btnBoth = document.getElementById('pcRouteBoth');
-    const screen = document.getElementById('ccRemotePreviewScreen');
-    const placeholder = document.getElementById('ccPhoneOnlyPlaceholder');
-    const statusCheck = document.getElementById('ccMobileBridgeStatus');
-
-    if (!btnPhone) return;
-
-    // Reset styles
-    [btnPhone, btnPC, btnBoth].forEach(btn => {
-        if (btn) {
-            btn.style.background = 'none';
-            btn.style.color = 'var(--text-muted)';
-            btn.style.boxShadow = 'none';
-        }
-    });
-
-    let activeBtn;
-    let sub;
-    if (mode === 'phone') {
-        activeBtn = btnPhone;
-        sub = 'Stream rendering on Phone only';
-        if (screen) screen.style.display = 'none';
-        if (placeholder) placeholder.style.display = 'flex';
-    } else if (mode === 'pc') {
-        activeBtn = btnPC;
-        sub = 'Stream rendering on PC only';
-        if (screen) screen.style.display = 'block';
-        if (placeholder) placeholder.style.display = 'none';
-    } else {
-        activeBtn = btnBoth;
-        sub = 'Stream rendering on Both screens';
-        if (screen) screen.style.display = 'block';
-        if (placeholder) placeholder.style.display = 'none';
-    }
-
-    if (activeBtn) {
-        activeBtn.style.background = '#10b981';
-        activeBtn.style.color = '#fff';
-        activeBtn.style.boxShadow = '0 0 10px rgba(16,185,129,0.3)';
-    }
-
-    if (statusCheck) statusCheck.innerHTML = window.safeHTML(`🟢 📱 Phone Connected | ${sub}`);
-};
-
 
 window.resumeCycleCount = function() {
     // compatibility stub
