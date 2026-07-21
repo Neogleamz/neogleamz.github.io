@@ -134,7 +134,7 @@ window.printKPIReport = function() {
     const content = contentEl ? contentEl.innerHTML : '';
     
     const printWin = window.open('', '', 'width=900,height=700');
-    printWin.document.write(`
+    const html = `
         <html>
             <head>
                 <title>${title} - Report</title>
@@ -154,7 +154,9 @@ window.printKPIReport = function() {
                 ${content}
             </body>
         </html>
-    `);
+    `;
+    const safe = DOMPurify.sanitize(html);
+    printWin.document.write(safe);
     printWin.document.close();
     setTimeout(() => {
         printWin.print();

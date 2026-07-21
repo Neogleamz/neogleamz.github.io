@@ -1056,7 +1056,7 @@ window.printReorderReport = function() {
             html += `<tr><td colspan="7" style="text-align:right; font-weight:bold; padding-top: 15px;">Total Capital Required:</td><td style="font-weight:bold; padding-top: 15px;">$${grandTotal.toFixed(2)}</td></tr>`;
             html += `</tbody></table>`;
         }
-        html += `</body></html>`; let win = window.open('', '', 'width=900,height=700'); win.document.write(html); win.document.close(); setTimeout(() => win.print(), 250);
+        html += `</body></html>`; let win = window.open('', '', 'width=900,height=700'); const safe = DOMPurify.sanitize(html); win.document.write(safe); win.document.close(); setTimeout(() => win.print(), 250);
     } catch (e) { sysLog(e.message, true); }
 }
 
