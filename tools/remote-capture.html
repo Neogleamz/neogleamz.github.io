@@ -719,10 +719,15 @@
             const card = document.createElement('div');
             card.className = 'phone-staged-thumbnail-card';
             card.setAttribute('data-url', url);
-            card.innerHTML = `
-                <img src="${url}" alt="Thumbnail" />
-                <button class="phone-staged-thumbnail-delete-btn">CLOSE</button>
-            `;
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Thumbnail';
+            card.appendChild(img);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'phone-staged-thumbnail-delete-btn';
+            deleteBtn.textContent = 'CLOSE';
+            card.appendChild(deleteBtn);
 
             // Expand preview event binding
             card.querySelector('img').addEventListener('click', () => {

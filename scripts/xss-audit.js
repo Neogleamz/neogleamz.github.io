@@ -21,6 +21,16 @@ const path = require('path');
 const ROOT  = path.resolve(__dirname, '..');
 const WARN_MODE = process.argv.includes('--warn');
 
+// Findings under these path prefixes are reported (full visibility) but never block the commit —
+// a newly-extended scan surface with a pre-existing backlog (15 inline-handler findings in
+// tools/remote-scanner.html, 1 in tools/remote-capture.html as of 2026-07-20) that this task does
+// not remediate. Flip to fully blocking by removing the 'tools' + path.sep entry once that backlog
+// reaches 0 — same lifecycle index.html/assets/js/*.js already completed (see file header).
+const ADVISORY_ONLY_PREFIXES = ['tools' + path.sep];
+function isAdvisoryOnly(relPath) {
+  return ADVISORY_ONLY_PREFIXES.some(p => relPath.startsWith(p));
+}
+
 // ── Files to scan ─────────────────────────────────────────────────────────────
 
 function collectFiles() {
@@ -30,6 +40,17 @@ function collectFiles() {
     fs.readdirSync(jsDir)
       .filter(f => f.endsWith('.js'))
       .forEach(f => files.push(path.join(jsDir, f)));
+  }
+  // tools/*.html — standalone pages (remote-scanner.html, remote-capture.html) outside the main
+  // index.html module graph. Previously invisible to every prior XSS audit (this class of bug
+  // hid here undetected — see fix-remote-scanner-history-xss). Findings here are advisory-only
+  // (ADVISORY_ONLY_PREFIXES below) until the pre-existing inline-handler backlog is triaged,
+  // mirroring nomenclature-audit.js's --warn soft-launch precedent.
+  const toolsDir = path.join(ROOT, 'tools');
+  if (fs.existsSync(toolsDir)) {
+    fs.readdirSync(toolsDir)
+      .filter(f => f.endsWith('.html'))
+      .forEach(f => files.push(path.join(toolsDir, f)));
   }
   return files;
 }
@@ -203,7 +224,8 @@ console.error(`${'─'.repeat(72)}\n`);
 
 for (const v of allFindings) {
   const icon = v.severity === 'CRITICAL' ? '🔴' : '🟠';
-  console.error(`${icon}  ${v.file}:${v.lineNum}  [${v.ruleId}]`);
+  const tag = isAdvisoryOnly(v.file) ? '  [ADVISORY-ONLY — does not block]' : '';
+  console.error(`${icon}  ${v.file}:${v.lineNum}  [${v.ruleId}]${tag}`);
   console.error(`   ${v.desc}`);
   console.error(`   ${v.snippet}`);
   console.error('');
@@ -214,4 +236,5 @@ console.error(`Fix all violations listed above.`);
 console.error(`Tracked in tools/SK8Lytz_Bucket_List.md → ## 🧹 Technical Debt`);
 console.error(`${'─'.repeat(72)}\n`);
 
-process.exit(WARN_MODE ? 0 : 1);
+const blocking = allFindings.filter(f => !isAdvisoryOnly(f.file));
+process.exit((WARN_MODE || blocking.length === 0) ? 0 : 1);
