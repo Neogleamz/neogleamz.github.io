@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### 🔒 Security
+- `fix/remote-scanner-history-xss` : **Stored XSS — Mobile Bridge History Broadcast** — Closed a Critical stored-XSS in the phone-QR-scan bridge's audit-history panel: a malicious value in a stock-audit note field could execute arbitrary JavaScript in anyone's phone browser session when they viewed the history panel while bridged. Fixed on both sides — the sender now sanitizes once and reuses the result for both its own render and the broadcast payload; the receiver (`tools/remote-scanner.html`, which had zero sanitizer infrastructure) now loads DOMPurify and sanitizes on receipt too as defense-in-depth. Also closed 3 adjacent unguarded `innerHTML` sinks in the same file family via native DOM construction, and extended the XSS scanner to cover `tools/*.html` for the first time (previously invisible to every prior audit — exactly how this bug hid). Verified: 0 CRITICAL XSS violations, 59/59 tests, 0 lint errors/warnings.
+
 ### ✨ Features & Bug Fixes
 - `fix/cc-mobile-bridge-sync-bugs` : **cc* Mobile Bridge — Silent Sync & Status Bugs** — Fixed 4 real, live bugs in the shipped phone-QR-scan cycle-count bridge (STOCKPILEZ → STOCKZ → 📷 SCAN PORTAL → 📱 Smartphone Link): the connection-status dot now turns green on connect, the QR code now auto-hides / live preview auto-shows instead of requiring a manual phone-side tap, the phone's manual item dropdown now populates instead of staying empty, and phone-side item selection now correctly syncs to the PC — closing a silent save-loss bug where a mismatched item selection caused a count submit to vanish with zero error on either device. Also deleted a confirmed-dead 3-way preview-routing function (`updateCCRouteUI()`) superseded by the live 2-way camera-route toggle. Discovered during `debt/nomenclature-remediation` Batch 9. Verified: 0 XSS violations, 59/59 tests, 0 lint errors/warnings.
 
