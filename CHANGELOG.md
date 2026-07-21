@@ -1,5 +1,13 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+
+### ✨ Features & Bug Fixes
+- `fix/cc-mobile-bridge-sync-bugs` : **cc* Mobile Bridge — Silent Sync & Status Bugs** — Fixed 4 real, live bugs in the shipped phone-QR-scan cycle-count bridge (STOCKPILEZ → STOCKZ → 📷 SCAN PORTAL → 📱 Smartphone Link): the connection-status dot now turns green on connect, the QR code now auto-hides / live preview auto-shows instead of requiring a manual phone-side tap, the phone's manual item dropdown now populates instead of staying empty, and phone-side item selection now correctly syncs to the PC — closing a silent save-loss bug where a mismatched item selection caused a count submit to vanish with zero error on either device. Also deleted a confirmed-dead 3-way preview-routing function (`updateCCRouteUI()`) superseded by the live 2-way camera-route toggle. Discovered during `debt/nomenclature-remediation` Batch 9. Verified: 0 XSS violations, 59/59 tests, 0 lint errors/warnings.
+
+### 🧹 Chores & Cleanup
+- `chore/nomenclature-scanner-hardening` : **Nomenclature Scanner Hardening** — Fixed a Windows CRLF false-positive in the dictionary-staleness check (`checkN7`) and a self-match blind spot that had silently prevented the orphaned-delegator-handler check (`checkN2`) from ever detecting a real finding since Phase 0 — now correctly surfaces 35 genuinely orphaned switch-case handlers for future triage. Verified: 0 XSS violations, 59/59 tests, 0 lint errors/warnings.
+
 ## [1.5.3] - 2026-07-17
 
 ### ✨ Features & Bug Fixes
