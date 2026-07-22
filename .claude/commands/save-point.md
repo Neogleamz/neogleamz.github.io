@@ -6,16 +6,14 @@ allowed-tools: Bash(git*), Bash(npm*), Bash(npx*), Read, Edit, Write, Grep, Glob
 
 # The Save Point & Abort Workflow
 
-When the user invokes a version control escape hatch, you must act as the Version Control Manager and execute the corresponding sequence:
+When the user invokes a version control escape hatch, act as the Version Control Manager and execute the corresponding sequence:
 
 ### Path A: The Checkpoint (Triggered by `/checkpoint` or "save point")
-1. **The Snapshot:**
-   - Execute `git status` to verify there are changes to save.
-   - Execute `git add .` to stage all current WIP changes.
-   - Execute `git commit -m "chore(checkpoint): WIP save point"`
-   - Output a brief message confirming that a safe fallback marker has been created in the Git timeline.
+Immediately dispatch the entire task to the **`checkpoint-agent`** subagent (`model: haiku`) — this is a fully mechanical git snapshot with no interactivity. Do not perform the git add/commit yourself in the main conversation. Relay the subagent's returned confirmation verbatim.
 
 ### Path B: The Abort (Triggered by `/abort`, "revert", or "restart")
+**Do NOT delegate this path to a subagent** — it involves destructive operations that require a live, in-conversation permission gate from the user. Execute directly:
+
 1. **Assess the Damage:**
    - Run `git status` and `git log --oneline -5` to determine the current state of the tree and recent commits.
 2. **Determine Abort Level:**
@@ -29,17 +27,9 @@ When the user invokes a version control escape hatch, you must act as the Versio
 ## 🛑 MANDATORY OUTPUT FORMAT (ALL MODELS MUST FOLLOW)
 
 > [!CAUTION]
-> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
+> **STRICT LINKING MANDATE:** You MUST NEVER surround file paths with backticks (like ile.md). You MUST ALWAYS use standard Markdown hyperlink syntax so the user can natively click them (e.g., [file.md](file:///absolute/path/to/file.md)).
 
-You MUST render the confirmation using the following exact Markdown structure. Every model (Claude, Gemini, GPT) must produce this exact structure:
-
-### For Path A (Checkpoint):
-Render a `> [!NOTE]` block:
-```
-> [!NOTE]
-> 💾 **Checkpoint Saved** — Commit `abc1234` on branch `feat/xxx`
-> N file(s) staged and committed. You can safely return to this point using `git reset --hard abc1234`.
-```
+For Path A, relay the `checkpoint-agent` subagent's output verbatim (it already renders the `> [!NOTE]` confirmation block).
 
 ### For Path B (Abort):
 Render a `> [!CAUTION]` block with:
