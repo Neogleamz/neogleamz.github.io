@@ -127,9 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_closeTaskPlanner':
                     if (window.closeTaskPlanner) window.closeTaskPlanner();
                     break;
-                case 'click_openTaskContext':
-                    if (window.openTaskContext) window.openTaskContext();
-                    break;
                 case 'click_closeTaskContext':
                     if (window.closeTaskContext) window.closeTaskContext();
                     break;
@@ -158,9 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_teRemoveTagFromTask':
                     if (typeof window.click_teRemoveTagFromTask === 'function') window.click_teRemoveTagFromTask(el);
-                    break;
-                case 'click_teCloseTaskContext':
-                    if (typeof window.teCloseTaskContext === 'function') window.teCloseTaskContext();
                     break;
                 case 'click_window_closeTagManager':
                     if (typeof window.teCloseTagManager === 'function') window.teCloseTagManager();
@@ -346,8 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.openDraftScrapModal();
                     break;
                 case 'click_window_printSOP':
-                case 'click_window_openPrintSOP_currentPri':
-                case 'click_window_openSopPrintModal_prod':
                     if (typeof window.openSopPrintModal === 'function') {
                         window.openSopPrintModal('production');
                     } else {
@@ -529,10 +521,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     break;
-                case 'click_teToggleTaskDone':
-                    event.stopPropagation();
-                    if(typeof window.teToggleTaskDone==='function') window.teToggleTaskDone(el.closest('.task-row').getAttribute('data-task-id'));
-                    break;
                 case 'click_teToggleSubtaskVisibility':
                     {
                         const tId = el.getAttribute('data-task-id');
@@ -560,14 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_teAddSubtask':
                     if(typeof window.teAddSubtask==='function') window.teAddSubtask();
                     break;
-                case 'click_teToggleSubtask':
-                    if(typeof window.teToggleSubtask==='function') window.teToggleSubtask(el.getAttribute('data-subtask-id'));
-                    break;
                 case 'click_tePostComment':
                     if(typeof window.tePostComment==='function') window.tePostComment();
-                    break;
-                case 'click_window_openSOPMasterModal_bat':
-                    window.openSOPMasterModal('batchez');
                     break;
                 case 'click_window_openSOPMasterModal_3d':
                     window.openSOPMasterModal('3d');
@@ -922,9 +904,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     break;
-                case 'click_openMediaManager_telemetry':
-                    openMediaManager('telemetry');
-                    break;
                 case 'click_openSOPTokenGuide':
                     openSOPTokenGuide();
                     break;
@@ -975,11 +954,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.addSOPRow(el);
                     }
                     break;
-                case 'click_addSOPRow_this':
-                    if (typeof window.addSOPRow === 'function') {
-                        window.addSOPRow(el);
-                    }
-                    break;
                 case 'click_window_closeArchiveExplorer':
                     window.closeArchiveExplorer();
                     break;
@@ -1015,14 +989,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_addCeoUnifiedSelection':
                     addCeoUnifiedSelection();
-                    break;
-                case 'click_if_typeof_toggleHorizontalPrev_12':
-                    if(typeof toggleHorizontalPreview==='function') toggleHorizontalPreview('packerzSopLeftPane', 'packerzSopPreviewCol', this);;
-                    break;
-                case 'click_addPackerzSOPRow_this':
-                    if (typeof window.addPackerzSOPRow === 'function') {
-                        window.addPackerzSOPRow(el);
-                    }
                     break;
                 case 'click_if_event_target_this_closeSOPM':
                     if(event.target===this)closeSOPMediaPicker();
@@ -1068,12 +1034,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_openSOPSnapshotCamera_production':
                     if (typeof window.click_openSOPSnapshotCamera_production === 'function') window.click_openSOPSnapshotCamera_production(event);
-                    break;
-                case 'click_openSOPSnapshotCamera_packerz':
-                    if (typeof window.click_openSOPSnapshotCamera_packerz === 'function') window.click_openSOPSnapshotCamera_packerz(event);
-                    break;
-                case 'click_openSOPSnapshotCamera_smart':
-                    if (typeof window.click_openSOPSnapshotCamera_smart === 'function') window.click_openSOPSnapshotCamera_smart(el);
                     break;
                 case 'click_moveSOPUp':
                     if (typeof window.moveSOPUp === 'function') window.moveSOPUp(el);
@@ -1130,9 +1090,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_document_getElementById_packer':
                     document.getElementById('packerzArchiveModal').style.display='none';
-                    break;
-                case 'click_printPackerzSOP_legacy':
-                    printPackerzSOP();
                     break;
                 case 'click_checkAllQueue':
                     if (typeof window.click_checkAllQueue === 'function') window.click_checkAllQueue();
@@ -1192,15 +1149,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'click_addPaperProfile':
                     addPaperProfile();
-                    break;
-                case 'click_window_closeCycleCountManager':
-                    window.closeCycleCountManager();
-                    break;
-                case 'click_window_saveManualCycleCount':
-                    window.executeWithButtonAction(el, 'SAVING...', '✅ SAVED', async () => { if(typeof window.saveManualCycleCount === 'function') await window.saveManualCycleCount(); });
-                    break;
-                case 'click_stopCycleCount':
-                    stopCycleCount();
                     break;
                 case 'click_openStockzAuditModal':
                     if (typeof window.openStockzAuditModal === 'function') {
@@ -1329,9 +1277,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_editWOQty':
                     if(window.editWOQty) window.editWOQty(el.getAttribute('data-id'));
                     break;
-                case 'click_openMediaManager':
-                    if(window.openMediaManager) window.openMediaManager(el.getAttribute('data-type'));
-                    break;
                 case 'click_selectPrintJob':
                     if(window.selectPrintJob) window.selectPrintJob(el.getAttribute('data-id'));
                     break;
@@ -1377,21 +1322,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'click_openLayerzPrintSOP':
                     if(window.openSopPrintModal) window.openSopPrintModal('production', el.getAttribute('data-name'));
                     break;
-                case 'click_openPrintSOP':
-                    if(window.openPrintSOP) window.openPrintSOP(el.getAttribute('data-name'));
-                    break;
-
-                case 'click_movePackerzSOPUp':
-                    if(window.movePackerzSOPUp) window.movePackerzSOPUp(el);
-                    break;
-                case 'click_movePackerzSOPDown':
-                    if(window.movePackerzSOPDown) window.movePackerzSOPDown(el);
-                    break;
                 case 'click_addPackerzSOPRow':
                     if(window.addPackerzSOPRow) window.addPackerzSOPRow(el);
-                    break;
-                case 'click_removePackerzSOPRow':
-                    if(window.removePackerzSOPRow) window.removePackerzSOPRow(el);
                     break;
                 case 'click_navigateSOPMediaFolder':
                     if(window.navigateSOPMediaFolder) window.navigateSOPMediaFolder(el.getAttribute('data-path'));
@@ -1571,13 +1503,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(window.deleteTipz) window.deleteTipz(Number(el.getAttribute('data-id')));
                     break;
 
-                case 'click_toggleHorizontalPreview':
-                    if(window.toggleHorizontalPreview) window.toggleHorizontalPreview(el.getAttribute('data-left'), el.getAttribute('data-preview'), el);
-                    break;
-                case 'click_deleteAllArchive':
-                    if(window.deleteAllArchive) window.deleteAllArchive();
-                    break;
-                    
+
                 // Label Designer / Whiteboard Mode Actions
                 case 'click_openWhiteboardDesigner':
                     if(typeof window.click_openWhiteboardDesigner === 'function') window.click_openWhiteboardDesigner();
@@ -1690,9 +1616,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'mousedown_initProductionSopResize_event':
                     if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'productionSopLeftPane', 'productionSopSplitWrapper', 'masterSopPreviewCol', false);
-                    break;
-                case 'mousedown_initPackerzSopResize_event':
-                    if (typeof window.initUnifiedSopResizer === 'function') window.initUnifiedSopResizer(event, 'packerzSopLeftPane', 'packerzSopSplitWrapper', 'packerzSopPreviewCol', false);
                     break;
                 case 'mousedown_initLiveSopResize_event':
                     if (typeof window.initUnifiedSopResizer === 'function') {
@@ -1841,17 +1764,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_window_updateStockzAuditItem':
                     if (typeof window.selectStockzAuditItem === 'function') window.selectStockzAuditItem(el.value);
                     break;
-                case 'change_window_updateCcMngrStock':
-                    window.updateCcMngrStock();
-                    break;
                 case 'change_teAssignUser':
                     if(typeof window.teUpdateTaskAssignee==='function' && window.currentOpenTaskId) {
                         window.teUpdateTaskAssignee(window.currentOpenTaskId, el.value);
-                    }
-                    break;
-                case 'change_teAssignCycle':
-                    if(typeof window.teUpdateTaskCycle==='function' && window.currentOpenTaskId) {
-                        window.teUpdateTaskCycle(window.currentOpenTaskId, el.value);
                     }
                     break;
                 case 'change_teToggleAllMain':
@@ -1901,9 +1816,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'change_teUpdateTagName':
                     if (typeof window.change_teUpdateTagName === 'function') window.change_teUpdateTagName(el);
                     break;
-                case 'change_teChangeIdentity':
-                    if (typeof window.teChangeIdentity === 'function') window.teChangeIdentity(el.value);
-                    break;
                 case 'change_teUpdateStartDate':
                     if (typeof window.teUpdateStartDate === 'function' && window.currentOpenTaskId) window.teUpdateStartDate(window.currentOpenTaskId, el.value);
                     break;
@@ -1951,7 +1863,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'input_checkWORouting':
                     checkWORouting();
                     break;
-                case 'input_renderProductionTelemetryPrevi':
                 case 'input_renderDashboardTelemetryPreview':
                     renderProductionTelemetryPreview();
                     break;
@@ -2057,9 +1968,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'focus_storeOldVal':
                     if (typeof window.focus_storeOldVal === 'function') window.focus_storeOldVal(el);
                     break;
-                case 'focus_storeOldVal_this':
-                    storeOldVal(el);
-                    break;
             }
         } catch (error) {
             console.error(`[Event Delegator] Error executing ${action} on ${event.type}:`, error);
@@ -2081,21 +1989,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'blur_updateDBCell':
                     if (typeof window.blur_updateDBCell === 'function') window.blur_updateDBCell(el);
-                    break;
-                case 'blur_window_handleCcMngrTelemetryEd':
-                    window.handleCcMngrTelemetryEdit(el, 1);
-                    break;
-                case 'blur_window_handleCcMngrTelemetryEd_16':
-                    window.handleCcMngrTelemetryEdit(el, 2);
-                    break;
-                case 'blur_window_handleCcMngrTelemetryEd_17':
-                    window.handleCcMngrTelemetryEdit(el, 3);
-                    break;
-                case 'blur_window_handleCcMngrTelemetryEd_18':
-                    window.handleCcMngrTelemetryEdit(el, 4);
-                    break;
-                case 'blur_window_handleCcMngrTelemetryEd_19':
-                    window.handleCcMngrTelemetryEdit(el, 5);
                     break;
                 case 'blur_teSaveTitle':
                     if(typeof window.teUpdateTaskTitle==='function' && window.currentOpenTaskId) {

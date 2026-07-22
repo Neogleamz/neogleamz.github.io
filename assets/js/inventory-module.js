@@ -1395,7 +1395,6 @@ window.initializeCcSyncChannel = function() {
         const qrContainer = document.getElementById('stockzAuditMobileQRContainer');
         const screenContainer = document.getElementById('stockzAuditMobilePreviewContainer');
         const placeholder = document.getElementById('stockzAuditPhoneOnlyPlaceholder');
-        const routeBar = document.getElementById('pcRouteBar');
 
         if (statusIndicator) {
             statusIndicator.style.background = '#10b981';
@@ -1404,7 +1403,6 @@ window.initializeCcSyncChannel = function() {
         if (qrContainer) qrContainer.style.display = 'none';
         if (screenContainer) screenContainer.style.display = 'flex';
         if (placeholder) placeholder.style.display = (currentPreviewMode === 'phone') ? 'flex' : 'none';
-        if (routeBar) routeBar.style.display = 'flex';
 
         // Broadcast the serialized grouped item dropdown directory list to the phone cockpit
         const select = document.getElementById('stockzAuditItemSelect');

@@ -89,11 +89,6 @@ async function teFetchAllData() {
     }
 }
 
-window.teChangeIdentity = function(_userId) {
-    // Deprecated: Identity is now strictly tied to Supabase Auth session via window.currentUser
-    console.warn("teChangeIdentity is deprecated.");
-};
-
 function teUpdateInboxBadge() {
     const badge = document.getElementById('te-inbox-badge');
     if (!badge) return;
@@ -1362,36 +1357,6 @@ window.teUpdateTaskAssignee = async function(taskId, assignee) {
     } catch(e) { console.error(e); }
 };
 
-window.teUpdateTaskCycle = async function(taskId, cycleId) {
-    let taskIds = [taskId];
-    const checkboxes = document.querySelectorAll('.te-task-checkbox:checked');
-    if (checkboxes.length > 0) {
-        taskIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
-        const selectAll = document.getElementById('te-main-select-all');
-        if (selectAll) selectAll.checked = false;
-        checkboxes.forEach(cb => cb.checked = false);
-        if (typeof window.teUpdateMainSelection === 'function') window.teUpdateMainSelection();
-    }
-    
-    let updatePromises = [];
-    
-    for (let id of taskIds) {
-        let task = taskEngineDB.taskz.find(t => t.id === id);
-        if (!task) continue;
-        
-        task.cycle_id = cycleId || null;
-        updatePromises.push(supabaseClient.from('taskz').update({ cycle_id: cycleId || null }).eq('id', id));
-    }
-    
-    if (updatePromises.length === 0) return;
-    
-    teRenderTaskGrid();
-    
-    try {
-        await Promise.all(updatePromises);
-    } catch(e) { console.error(e); }
-};
-
 window.teSelectProject = function(projectId) {
     window.teActiveProjectId = projectId;
     document.querySelectorAll('.task-nav-link').forEach(l => l.classList.remove('active'));
@@ -2188,13 +2153,6 @@ window.closeTaskPlanner = function() {
     const modal = document.getElementById('taskPlannerModal');
     if (modal) {
         modal.style.display = 'none';
-    }
-};
-
-window.openTaskContext = function() {
-    const flyout = document.getElementById('taskContextFlyout');
-    if (flyout) {
-        flyout.classList.remove('hidden');
     }
 };
 
