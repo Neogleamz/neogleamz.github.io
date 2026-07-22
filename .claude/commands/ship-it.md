@@ -11,12 +11,12 @@ Act as the Release Manager and execute this sequence. Base branch (if provided):
 
 1. **Verify context** — `git branch --show-current`; confirm we're on a feature branch (`feat/*`, `fix/*`, `chore/*`).
 2. **Find base** — use the Epic target from the Bucket List if known; otherwise ask which branch to merge into (e.g. `main`).
-3. **Pre-flight validation swarm (zero-trust gate)** — spawn the following three agents in parallel before touching the merge:
-   - **XSS Gate:** Run `node scripts/xss-audit.js` (no `--warn` — this is blocking mode). If any violations are reported, **HALT** and list them. Forbidden from merging until zero violations exist in changed files.
-   - **Test + Lint Gate:** Run `npm test` and `npx eslint .`. **HALT** if either errors.
-   - **Diff Reviewer:** Read the full `git diff <base>...<feature>` and review for: hardcoded secrets, unhandled exceptions, missing `try/catch` on async calls, uncleared DOM listeners, missing `window.executeWithButtonAction` on mutation buttons, any `var` declarations, any inline `onclick=` / `onchange=` attributes.
+3. **Pre-flight validation swarm (zero-trust gate)** — dispatch the following three **named subagents** in parallel before touching the merge (do not run these checks inline yourself — each carries its own pinned model tier):
+   - **XSS Gate** (`subagent_type: xss-validator` · sonnet): Run `node scripts/xss-audit.js` (no `--warn` — this is blocking mode). If any violations are reported, **HALT** and list them. Forbidden from merging until zero violations exist in changed files.
+   - **Test + Lint Gate** (`subagent_type: test-lint-runner` · haiku): Run `npm test` and `npx eslint .`. **HALT** if either errors.
+   - **Diff Reviewer** (`subagent_type: diff-reviewer` · sonnet): Read the full `git diff <base>...<feature>` and review for: hardcoded secrets, unhandled exceptions, missing `try/catch` on async calls, uncleared DOM listeners, missing `window.executeWithButtonAction` on mutation buttons, any `var` declarations, any inline `onclick=` / `onchange=` attributes.
    
-   Synthesize all three into a Gate Results Table. If anything fails: list it and **HALT** for permission to fix or abort.
+   Synthesize all three into a Gate Results Table. If anything fails: list it and **HALT** for permission to fix or abort. This synthesis and HALT decision always happens in the main conversation — only the three checks themselves are delegated.
 4. **Ledger reconciliation** — open [tools/SK8Lytz_Bucket_List.md](tools/SK8Lytz_Bucket_List.md); check off (`[x]`) any tasks these changes fulfilled, even across Epics.
 5. **Database sync gate** — if any `supabase/migrations/*.sql` changed, invoke `/supabase-sync` before merging. (Note: remote migration history is empty — apply DDL via the Supabase SQL Editor, not `db push`.)
 6. **Knowledge audit gate** — if new DB tables / BLE commands / global contexts were introduced, document them in [tools/SK8Lytz_App_Master_Reference.md](tools/SK8Lytz_App_Master_Reference.md).
