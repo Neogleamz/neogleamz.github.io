@@ -1459,9 +1459,6 @@ window.unarchivePackerzOrder = async function(orderId, skipConfirm = false, skip
 // ==========================================
 
 // BATCHEZ-Legacy Logic Movers
-window.movePackerzSOPUp = function(btn) { let row = btn.closest('.sop-step-row'); if(row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling); }
-window.movePackerzSOPDown = function(btn) { let row = btn.closest('.sop-step-row'); if(row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row); }
-window.removePackerzSOPRow = function(btn) { btn.closest('.sop-step-row').remove(); }
 window.addPackerzSOPRow = function(btn) {
     let newRow = document.createElement('div');
     const sku = btn ? (btn.getAttribute('data-prodid') || currentPackerzQaSku || 'unknown') : (currentPackerzQaSku || 'unknown');
@@ -2414,12 +2411,6 @@ let sopSnapshotStream = null;
 
 window.click_openSOPSnapshotCameraInline = function(_e) {
     window.activeSOPTextAreaId = 'packerzLiveInlineQA';
-    openSOPSnapshotCamera();
-};
-
-window.click_openSOPSnapshotCamera_packerz = function(e) {
-    if (typeof e !== 'undefined' && e) e.preventDefault();
-    window.activeSOPTextAreaId = 'productionAdminQA';
     openSOPSnapshotCamera();
 };
 

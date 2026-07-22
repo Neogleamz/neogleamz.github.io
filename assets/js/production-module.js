@@ -3390,7 +3390,6 @@ if (typeof window !== 'undefined') {
     window.advanceWO = typeof advanceWO !== 'undefined' ? advanceWO : undefined;
     window.printPickList = typeof printPickList !== 'undefined' ? printPickList : undefined;
     window.printSOP = typeof printSOP !== 'undefined' ? printSOP : undefined;
-    window.openPrintSOP = typeof openPrintSOP !== 'undefined' ? openPrintSOP : undefined;
     window.deleteAllArchive = typeof deleteAllArchive !== 'undefined' ? deleteAllArchive : undefined;
     window.closeArchiveExplorer = typeof closeArchiveExplorer !== 'undefined' ? closeArchiveExplorer : undefined;
     window.switchArchiveTab = typeof switchArchiveTab !== 'undefined' ? switchArchiveTab : undefined;
