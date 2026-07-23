@@ -1,5 +1,10 @@
 # SK8Lytz Application Changelog
 
+## [Unreleased]
+
+### 🧹 Chores & Cleanup
+- `chore/bucketlist-phase-roadmap-declaration` : **Bucketlist Phase/Batch Roadmap Declaration** — Amended `.claude/commands/bucketlist.md`'s Pre-Task Intelligence Swarm (step 3) to state a forward-looking roadmap when the implementation-planner discovers a phase's true scope is far bigger than one batch can resolve, before executing anything, instead of only narrating "Batch N/N" reactively after each pass. Prevents surprise multi-phase cascades by surfacing scope balloons at the HALT-for-approval gate. Verified: 0 XSS violations, 59/59 tests, 0 lint errors/warnings.
+
 ## [1.5.4] - 2026-07-23
 
 ### 🔒 Security
