@@ -313,7 +313,7 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 
 ### I. WebRTC Scanner Layouts & iOS Compatibility
 * **Dual-Card Architecture:** When building inline hardware camera scanners (like the Cycle Count engine), you must NEVER use abrasive full-screen blackout modals. You must deploy a responsive `flex-wrap` layout (`align-items: stretch`) where the Primary Form and the Scanner Card lock into a rigid side-by-side array natively.
-* **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#barcode-reader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
+* **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#stockzAuditLocalReader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
 * **Mobile Viewport Optimization Guidelines (Fit to Screen):** To prevent vertical scrolling on tall mobile screens with active browser toolbars, the scanner frame container should be limited to `220px` square, `qrbox` to `180px`, input/button heights to `44px`, and layout gaps to `10px` or less.
 * **iOS Viewport Auto-Zoom Prevention (CRITICAL):** To prevent standard iOS Safari from automatically zooming into the page on element focus, dropdowns (`<select>`) and numeric inputs (`<input>`) MUST enforce a `font-size` of exactly `16px` or larger.
 
@@ -441,7 +441,7 @@ Consistently map these tokens globally across dropdowns, tables, and Hub cards:
 
 ### I. WebRTC Scanner Layouts & iOS Compatibility
 * **Dual-Card Architecture:** When building inline hardware camera scanners (like the Cycle Count engine), you must NEVER use abrasive full-screen blackout modals. You must deploy a responsive `flex-wrap` layout (`align-items: stretch`) where the Primary Form and the Scanner Card lock into a rigid side-by-side array natively.
-* **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#barcode-reader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
+* **Aspect Ratio Hardware Constraint (CRITICAL):** The actual live video feed (`#stockzAuditLocalReader`) MUST be structurally restrained using `aspect-ratio: 1/1; width: 100%` within the DOM Card. Even more importantly, the instantiation script `Html5Qrcode.start()` MUST explicitly declare the configuration `{ aspectRatio: 1.0 }`. Failure to pass this specific flag into the runtime engine will result in catastrophic, un-fixable extreme zooming defects on iOS Safari devices.
 * **Mobile Viewport Optimization Guidelines (Fit to Screen):** To prevent vertical scrolling on tall mobile screens with active browser toolbars, the scanner frame container should be limited to `220px` square, `qrbox` to `180px`, input/button heights to `44px`, and layout gaps to `10px` or less.
 * **iOS Viewport Auto-Zoom Prevention (CRITICAL):** To prevent standard iOS Safari from automatically zooming into the page on element focus, dropdowns (`<select>`) and numeric inputs (`<input>`) MUST enforce a `font-size` of exactly `16px` or larger.
 
@@ -558,7 +558,7 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 ### A. Global Modals (Overlays) & Logic Matrix
 *All modal overlays must use `class="modal-overlay"`, strict `z-index` layering, and absolute/fixed centering to ensure responsive execution.*
 - `sandboxDataModal`: The primary safety gate for IMPORTZ. Must execute `customCommitFn` instead of blindly overwriting databases to guarantee explicit user staging.
-- `cycleCountManagerModal`: The WebBluetooth/WebRTC scanner UI for STOCKZ. Requires physical `#barcode-reader` strictly typed with `{aspectRatio: 1.0}` to prevent iOS zoom malfunctions.
+- `stockzAuditModal`: The WebBluetooth/WebRTC scanner UI for STOCKZ (Inventory Audit & Supply Chain Planning Console). Requires physical `#stockzAuditLocalReader` strictly typed with `{aspectRatio: 1.0}` to prevent iOS zoom malfunctions. (Legacy alias: `window.openCycleCountManager()`/`window.closeCycleCountManager()` in `assets/js/inventory-module.js:2148-2154` forward to `window.openStockzAuditModal('', 'audit')`/`window.closeStockzAuditModal()` for backward-compatible call sites — no `cycleCountManagerModal` DOM element exists.)
 - `archiveExplorerModal`: Handles Soft-Delete recovery via nested `.archive-card` elements. Uses `.btn-red-muted` to prevent accidental hard wipes.
 - `sopMasterModal`: The core editor for standard operating procedures (MAKERZ). Controls structural `#sopRowsContainer`.
 - `velocityzModal`: The financial forecast UI embedded within STOCKZ grids.
@@ -588,7 +588,7 @@ To strictly enforce standard Vanilla JS interaction mapping within `index.html`,
 - **`paneSimple` (EDITZ)**:
   - Value adjuster matrix utilizing inline `.btn-orange` logic.
 - **`paneInventory` (STOCKZ)**:
-  - The real-time interactive lifecycle module. Triggers `cycleCountManagerModal` via standard scanner hardware, integrates explicit `velocityzModal` charting, and hosts the high-fidelity `stockzAuditModal` (Inventory Audit & Supply Chain Planning Console) which secures calculated adjustments with physical-count-driven math, sliders for ROP, and WebRTC real-time phone scans.
+  - The real-time interactive lifecycle module. Integrates explicit `velocityzModal` charting and hosts the high-fidelity `stockzAuditModal` (Inventory Audit & Supply Chain Planning Console) — the live WebBluetooth/WebRTC scanner UI for STOCKZ (accessible via the compatibility aliases `window.openCycleCountManager()`/`window.closeCycleCountManager()`) — which secures calculated adjustments with physical-count-driven math, sliders for ROP, and WebRTC real-time phone scans.
 
 #### 3. MAKERZ (Production Ecosystem)
 - **`paneProdBuilder` (RECIPEZ)**:
