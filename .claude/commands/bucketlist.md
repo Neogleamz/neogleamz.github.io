@@ -36,7 +36,8 @@ When the user instructs you to start the next task (e.g., "what's next"), you mu
    - **Agent C — Security Scout** (`subagent_type: security-scout` · sonnet; required for XSS/security tasks): Run `node scripts/xss-audit.js --warn` focused on ALL target files in the batch. Enumerate every violation across all files that the batch must resolve. If no tasks are security-related, skip.
 
    Once all agents return, synthesize outputs into a **combined batch plan**, then:
-   - **HALT ALL ACTION.** Ask: *"Pre-task intelligence complete for [N] parallel tasks. Review the batch plan above. Type 'proceed' to execute all, or provide feedback."* Do not write code until approved.
+   - **Scope-explosion escape valve:** If Agent B_i's independent verification finds a task's true remaining scope is clearly too large for this batch to resolve in full (e.g. the touch-point count is an order of magnitude bigger than the ledger's description, or the plan itself concludes the work cannot complete in one pass), do not silently scope down to "this batch only" without comment. The combined batch plan must include a short forward-looking **Roadmap** section: a rough grouping of the remaining work into likely future batches/phases (not a precise count), stated once here — not narrated reactively batch-by-batch after the fact.
+   - **HALT ALL ACTION.** Ask: *"Pre-task intelligence complete for [N] parallel tasks. Review the batch plan above. Type 'proceed' to execute all, or provide feedback."* Do not write code until approved. If a scope-explosion Roadmap is included above, say so explicitly in the prompt — e.g. append: *"This batch is expected to be the first of several; review the roadmap alongside the batch plan before typing 'proceed.'"*
 
 4. **Discovery & Clarification Phase**:
    - If Agent A or B surfaces ambiguities or missing information, **HALT.** Output a numbered list of clarifying questions. Wait for answers before proceeding.
