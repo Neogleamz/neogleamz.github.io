@@ -401,7 +401,7 @@ Two phone-oriented pages ride along in `tools/` and authenticate by **session ha
 - **`tools/remote-scanner.html`** — "NEOGLEAMZ Remote Scanner" ([`:6`](../tools/remote-scanner.html)), a phone barcode scanner that streams scans into inventory cycle-counts / packing QA; `setSession` at [`:939`](../tools/remote-scanner.html).
 - **`tools/remote-capture.html`** — "NEOGLEAMZ Remote Shutter" ([`:6`](../tools/remote-capture.html)), a phone-as-camera for capturing SOP/QA media into Supabase Storage; `setSession` at [`:600`](../tools/remote-capture.html).
 
-These pair with the in-app WebRTC scanner modal (`cycleCountManagerModal`) and the Packerz camera scanner. `qa-dashboard.html` is a separate internal QA/diagnostics surface (whitelisted as a root file, §11).
+These pair with the in-app WebRTC scanner modal (`stockzAuditModal`) and the Packerz camera scanner. `qa-dashboard.html` is a separate internal QA/diagnostics surface (whitelisted as a root file, §11).
 
 ---
 
