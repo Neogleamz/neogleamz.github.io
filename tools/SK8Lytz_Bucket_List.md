@@ -27,12 +27,19 @@ This document acts as the permanent, living task tracker integrated directly wit
 *Clean sweep — all P2 enhancements successfully completed and archived!* ✅
 
 ## 🧹 Technical Debt
-
-- [ ] **[tools/SK8Lytz_App_Master_Reference.md:561, 591](../tools/SK8Lytz_App_Master_Reference.md)** — stale documentation discovered during `debt/nomenclature-remediation` Batch 9: both lines describe `cycleCountManagerModal` and its required `#barcode-reader` element as the live STOCKZ scanner UI, but neither DOM id exists anymore (both were superseded by `stockzAuditModal`/`stockzAuditLocalReader` in a past redesign, confirmed via the `openCycleCountManager`/`closeCycleCountManager` alias trace). Adjacent aspect-ratio hardware-constraint notes at lines 316/444 reference the same retired `#barcode-reader` id and should be updated to cite `stockzAuditLocalReader` instead so the iOS Safari zoom-bug knowledge isn't lost. Low priority, doc-only, no code risk — small dedicated pass, not bundled into any active branch. (Plan: [docs/plans/debt-nomenclature-remediation-9.md](../docs/plans/debt-nomenclature-remediation-9.md) §4) [Files: tools/SK8Lytz_App_Master_Reference.md]
+*Clean sweep — all technical debt items successfully completed and archived!* ✅
 
 ---
 
 ## 🗄️ Completed & Archived Epics
+
+### Target: `main`
+**Epic: Master Reference Doc Sync (branch `debt/master-reference-doc-sync`)**
+*(Archived — 2026-07-23)*
+*Logged as a Technical Debt item during `debt/nomenclature-remediation` Batch 9 — 2026-07-19. Executed as a single-task `/bucketlist` pass on `debt/master-reference-doc-sync` (commit `708a2b0`).*
+
+#### 🟢 Low — Documentation
+- [x] `debt/master-reference-doc-sync` : **[tools/SK8Lytz_App_Master_Reference.md:561, 591](../tools/SK8Lytz_App_Master_Reference.md)** — stale documentation discovered during `debt/nomenclature-remediation` Batch 9: both lines described `cycleCountManagerModal` and its required `#barcode-reader` element as the live STOCKZ scanner UI, but neither DOM id exists anymore (superseded by `stockzAuditModal`/`stockzAuditLocalReader` in a past redesign). *Done — fixed all 4 Master Reference line references (316, 444 — confirmed verbatim-duplicated "WebRTC Scanner Layouts" section, both copies fixed independently — plus 561, 591) to cite the live `stockzAuditModal`/`stockzAuditLocalReader` ids while preserving the iOS Safari `aspect-ratio`/`{aspectRatio: 1.0}` hardware-constraint knowledge (confirmed still accurate/live at inventory-module.js:2369/2397) and noting the still-live `openCycleCountManager`/`closeCycleCountManager` compatibility aliases (inventory-module.js:2148-2154) so a future reader isn't confused. User-approved scope addition: also fixed the identical stale claim at `docs/ARCHITECTURE.md:404`. `tools/remote-scanner.html`'s own genuinely separate, real `#barcode-reader` id was confirmed out of scope (standalone phone-companion tool). Zero application code touched — pure documentation fix. Verified: 0 XSS violations (before=15/after=15, both pre-existing advisory-only findings in unrelated `tools/*.html` files), 59/59 tests, 0 lint errors/warnings.* (Plan: [docs/plans/debt-master-reference-doc-sync-1.md](../docs/plans/debt-master-reference-doc-sync-1.md)) [Files: tools/SK8Lytz_App_Master_Reference.md, docs/ARCHITECTURE.md]
 
 ### Target: `main`
 **Epic: Nomenclature Audit Engine (multi-phase: `fix/dead-ui-wiring` → `feat/nomenclature-registry` → `feat/nomenclature-audit-engine` → `debt/nomenclature-remediation` → `debt/brand-sweep`)**
